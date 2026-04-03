@@ -91,9 +91,6 @@ final class Builder
         private Grammar $grammar,
     ) {}
 
-    // ---------------------------------------------------------------
-    //  SELECT
-    // ---------------------------------------------------------------
 
     /**
      * Set the columns to select.
@@ -163,9 +160,6 @@ final class Builder
         return $this;
     }
 
-    // ---------------------------------------------------------------
-    //  FROM
-    // ---------------------------------------------------------------
 
     /**
      * Set the table to query from.
@@ -214,9 +208,6 @@ final class Builder
         return $this;
     }
 
-    // ---------------------------------------------------------------
-    //  WHERE
-    // ---------------------------------------------------------------
 
     /**
      * Add a basic WHERE clause to the query.
@@ -693,9 +684,6 @@ final class Builder
         return $this;
     }
 
-    // ---------------------------------------------------------------
-    //  JOIN
-    // ---------------------------------------------------------------
 
     /**
      * Add an INNER JOIN clause.
@@ -791,9 +779,6 @@ final class Builder
         return $this->addJoinSub('right', $query, $alias, $first, $operator, $second);
     }
 
-    // ---------------------------------------------------------------
-    //  ORDER
-    // ---------------------------------------------------------------
 
     /**
      * Add an ORDER BY clause.
@@ -875,9 +860,6 @@ final class Builder
         return $this;
     }
 
-    // ---------------------------------------------------------------
-    //  GROUP BY
-    // ---------------------------------------------------------------
 
     /**
      * Add GROUP BY columns.
@@ -907,9 +889,6 @@ final class Builder
         return $this;
     }
 
-    // ---------------------------------------------------------------
-    //  HAVING
-    // ---------------------------------------------------------------
 
     /**
      * Add a HAVING clause to the query.
@@ -1019,9 +998,6 @@ final class Builder
         return $this;
     }
 
-    // ---------------------------------------------------------------
-    //  LIMIT / OFFSET
-    // ---------------------------------------------------------------
 
     /**
      * Set the maximum number of rows to return.
@@ -1078,9 +1054,6 @@ final class Builder
         return $this->offset(($page - 1) * $perPage)->limit($perPage);
     }
 
-    // ---------------------------------------------------------------
-    //  LOCK
-    // ---------------------------------------------------------------
 
     /**
      * Lock rows for update (SELECT ... FOR UPDATE).
@@ -1102,9 +1075,6 @@ final class Builder
         return $this;
     }
 
-    // ---------------------------------------------------------------
-    //  UNION
-    // ---------------------------------------------------------------
 
     /**
      * Add a UNION to the query.
@@ -1132,9 +1102,6 @@ final class Builder
         return $this;
     }
 
-    // ---------------------------------------------------------------
-    //  CTE
-    // ---------------------------------------------------------------
 
     /**
      * Add a Common Table Expression (CTE) to the query.
@@ -1184,9 +1151,6 @@ final class Builder
         return $this;
     }
 
-    // ---------------------------------------------------------------
-    //  CONDITIONAL
-    // ---------------------------------------------------------------
 
     /**
      * Apply a callback when the given condition is true.
@@ -1218,9 +1182,6 @@ final class Builder
         return $this;
     }
 
-    // ---------------------------------------------------------------
-    //  TYPE CASTING
-    // ---------------------------------------------------------------
 
     /**
      * Set column type casts for result rows.
@@ -1234,9 +1195,6 @@ final class Builder
         return $this;
     }
 
-    // ---------------------------------------------------------------
-    //  READ
-    // ---------------------------------------------------------------
 
     /**
      * Execute the SELECT query and return a ResultSet.
@@ -1375,9 +1333,6 @@ final class Builder
         return !$this->exists();
     }
 
-    // ---------------------------------------------------------------
-    //  PAGINATION
-    // ---------------------------------------------------------------
 
     /**
      * Paginate the query results with a total count.
@@ -1440,9 +1395,6 @@ final class Builder
         return new CursorPaginator($items, $perPage, $cursor, $hasMore, $nextCursor);
     }
 
-    // ---------------------------------------------------------------
-    //  AGGREGATES
-    // ---------------------------------------------------------------
 
     /**
      * Get the count of matching rows.
@@ -1510,9 +1462,6 @@ final class Builder
         return $this->avg($column);
     }
 
-    // ---------------------------------------------------------------
-    //  WRITE
-    // ---------------------------------------------------------------
 
     /**
      * Insert a single row into the table.
@@ -1728,9 +1677,6 @@ final class Builder
         return $this->update($values);
     }
 
-    // ---------------------------------------------------------------
-    //  CHUNKING
-    // ---------------------------------------------------------------
 
     /**
      * Process results in chunks for memory-efficient iteration.
@@ -1886,9 +1832,6 @@ final class Builder
         }
     }
 
-    // ---------------------------------------------------------------
-    //  DEBUG
-    // ---------------------------------------------------------------
 
     /**
      * Compile the query to a SQL string with placeholders.
@@ -1965,9 +1908,6 @@ final class Builder
         exit(1);
     }
 
-    // ---------------------------------------------------------------
-    //  CLONE
-    // ---------------------------------------------------------------
 
     /**
      * Deep clone all mutable array state.
@@ -1987,9 +1927,6 @@ final class Builder
         $this->unions = $clonedUnions;
     }
 
-    // ---------------------------------------------------------------
-    //  CONNECTION
-    // ---------------------------------------------------------------
 
     /**
      * Force this query to use the write connection.
@@ -2009,9 +1946,6 @@ final class Builder
         return $this->useWrite;
     }
 
-    // ---------------------------------------------------------------
-    //  INTERNAL
-    // ---------------------------------------------------------------
 
     /**
      * Build the component array expected by the Grammar.

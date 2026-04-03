@@ -32,7 +32,6 @@ final class MySqlSchemaGrammar extends SchemaGrammar
             $columns[] = $this->compileColumn($column);
         }
 
-        // Collect primary key columns from column definitions
         $primaryColumns = [];
         foreach ($blueprint->getColumns() as $column) {
             if ($column->getAttribute('primary') === true) {
@@ -42,18 +41,15 @@ final class MySqlSchemaGrammar extends SchemaGrammar
             }
         }
 
-        // Add inline indexes
         foreach ($blueprint->getIndexes() as $index) {
             $columns[] = $this->compileIndex($index, $blueprint->getTable());
         }
 
-        // Add primary key from column-level primary markers (only if no explicit primary index)
         if ($primaryColumns !== [] && !$this->hasExplicitPrimaryIndex($blueprint)) {
             $wrapped = implode(', ', array_map(fn(string $c): string => $this->wrapColumn($c), $primaryColumns));
             $columns[] = 'PRIMARY KEY (' . $wrapped . ')';
         }
 
-        // Unique/index from column-level markers
         foreach ($blueprint->getColumns() as $column) {
             /** @var string $colName */
             $colName = $column->getAttribute('name', '');
@@ -69,7 +65,6 @@ final class MySqlSchemaGrammar extends SchemaGrammar
             }
         }
 
-        // Add foreign keys
         foreach ($blueprint->getForeignKeys() as $foreignKey) {
             $columns[] = $this->compileForeignKey($foreignKey, $blueprint->getTable());
         }
@@ -95,7 +90,6 @@ final class MySqlSchemaGrammar extends SchemaGrammar
         $statements = [];
         $table = $this->wrapTable($blueprint->getTable());
 
-        // Add new columns
         foreach ($blueprint->getColumns() as $column) {
             if ($column->getAttribute('change') === true) {
                 $statements[] = 'ALTER TABLE ' . $table . ' MODIFY COLUMN ' . $this->compileColumn($column);
@@ -114,17 +108,14 @@ final class MySqlSchemaGrammar extends SchemaGrammar
             }
         }
 
-        // Add new indexes
         foreach ($blueprint->getIndexes() as $index) {
             $statements[] = 'ALTER TABLE ' . $table . ' ADD ' . $this->compileIndex($index, $blueprint->getTable());
         }
 
-        // Add foreign keys
         foreach ($blueprint->getForeignKeys() as $foreignKey) {
             $statements[] = 'ALTER TABLE ' . $table . ' ADD ' . $this->compileForeignKey($foreignKey, $blueprint->getTable());
         }
 
-        // Process commands
         foreach ($blueprint->getCommands() as $command) {
             $compiled = $this->compileCommand($command, $blueprint->getTable());
             if ($compiled !== []) {
@@ -234,7 +225,6 @@ final class MySqlSchemaGrammar extends SchemaGrammar
             $sql .= ' COLLATE ' . $collation;
         }
 
-        // Generated columns
         /** @var string|null $virtualAs */
         $virtualAs = $column->getAttribute('virtualAs');
         /** @var string|null $storedAs */
@@ -246,7 +236,6 @@ final class MySqlSchemaGrammar extends SchemaGrammar
             $sql .= ' GENERATED ALWAYS AS (' . $storedAs . ') STORED';
         }
 
-        // Nullability (generated columns cannot have NOT NULL / NULL)
         if ($virtualAs === null && $storedAs === null) {
             if ($column->getAttribute('nullable') === true) {
                 $sql .= ' NULL';
@@ -255,24 +244,20 @@ final class MySqlSchemaGrammar extends SchemaGrammar
             }
         }
 
-        // Default value
         if ($column->getAttribute('useCurrent') === true) {
             $sql .= ' DEFAULT CURRENT_TIMESTAMP';
         } elseif (array_key_exists('default', $column->getAttributes())) {
             $sql .= ' DEFAULT ' . $this->getDefaultValue($column->getAttribute('default'));
         }
 
-        // ON UPDATE
         if ($column->getAttribute('useCurrentOnUpdate') === true) {
             $sql .= ' ON UPDATE CURRENT_TIMESTAMP';
         }
 
-        // Auto increment
         if ($column->getAttribute('autoIncrement') === true) {
             $sql .= ' AUTO_INCREMENT';
         }
 
-        // Comment
         /** @var string|null $comment */
         $comment = $column->getAttribute('comment');
         if ($comment !== null) {
@@ -282,9 +267,6 @@ final class MySqlSchemaGrammar extends SchemaGrammar
         return $sql;
     }
 
-    // ---------------------------------------------------------------
-    //  Internal Helpers
-    // ---------------------------------------------------------------
 
     /**
      * Check if the blueprint has an explicit primary index.

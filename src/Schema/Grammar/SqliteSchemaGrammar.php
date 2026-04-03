@@ -46,7 +46,6 @@ final class SqliteSchemaGrammar extends SchemaGrammar
             $columns[] = $this->compileColumn($column);
         }
 
-        // Collect primary key columns from column definitions (skip single auto-increment PKs handled inline)
         $primaryColumns = [];
         foreach ($blueprint->getColumns() as $column) {
             if ($column->getAttribute('primary') === true && $column->getAttribute('autoIncrement') !== true) {
@@ -101,7 +100,6 @@ final class SqliteSchemaGrammar extends SchemaGrammar
             }
         }
 
-        // SQLite 3.25+ supports RENAME COLUMN
         foreach ($blueprint->getCommands() as $command) {
             if ($command['type'] === 'renameColumn') {
                 /** @var string $from */
@@ -184,7 +182,6 @@ final class SqliteSchemaGrammar extends SchemaGrammar
     {
         $sql = '';
 
-        // SQLite: INTEGER PRIMARY KEY AUTOINCREMENT is handled inline
         if ($column->getAttribute('autoIncrement') === true && $column->getAttribute('primary') === true) {
             $sql .= ' PRIMARY KEY AUTOINCREMENT';
 

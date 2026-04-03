@@ -200,9 +200,6 @@ final class MySqlGrammar extends Grammar
         return 'TRUNCATE TABLE ' . $this->wrapTable($table);
     }
 
-    // ---------------------------------------------------------------
-    //  MySQL JSON Support
-    // ---------------------------------------------------------------
 
     /**
      * Wrap a JSON selector path for MySQL (e.g. "column->path" becomes `column`->'$.path').
@@ -219,7 +216,6 @@ final class MySqlGrammar extends Grammar
         $field = substr($column, 0, $arrowPos);
         $path = substr($column, $arrowPos + 2);
 
-        // Convert arrow notation to MySQL JSON path: "a->b->c" becomes '$.b.c'
         $jsonPath = str_replace('->', '.', $path);
 
         return $this->wrap($field) . '->\'$.' . $jsonPath . '\'';

@@ -46,9 +46,6 @@ final class Blueprint
         private readonly string $table,
     ) {}
 
-    // ---------------------------------------------------------------
-    //  Column Types
-    // ---------------------------------------------------------------
 
     /**
      * Create an auto-incrementing BIGINT UNSIGNED primary key column.
@@ -476,9 +473,6 @@ final class Blueprint
         return $this->addColumn('macAddress', $column);
     }
 
-    // ---------------------------------------------------------------
-    //  Convenience Methods
-    // ---------------------------------------------------------------
 
     /**
      * Add nullable created_at and updated_at TIMESTAMP columns.
@@ -562,9 +556,6 @@ final class Blueprint
         return $this->uuid($column);
     }
 
-    // ---------------------------------------------------------------
-    //  Index Methods
-    // ---------------------------------------------------------------
 
     /**
      * Add a primary key index.
@@ -634,9 +625,6 @@ final class Blueprint
         return $foreignKey;
     }
 
-    // ---------------------------------------------------------------
-    //  ALTER Methods
-    // ---------------------------------------------------------------
 
     /**
      * Drop one or more columns from the table.
@@ -726,9 +714,6 @@ final class Blueprint
         $this->dropColumn([$name . '_type', $name . '_id']);
     }
 
-    // ---------------------------------------------------------------
-    //  Table Options
-    // ---------------------------------------------------------------
 
     /**
      * Set the storage engine (MySQL).
@@ -778,9 +763,6 @@ final class Blueprint
         $this->temporary = true;
     }
 
-    // ---------------------------------------------------------------
-    //  Getters
-    // ---------------------------------------------------------------
 
     /**
      * Get the table name.
@@ -870,9 +852,6 @@ final class Blueprint
         return $this->temporary;
     }
 
-    // ---------------------------------------------------------------
-    //  Internal
-    // ---------------------------------------------------------------
 
     /**
      * Add a column definition to the blueprint.

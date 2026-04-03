@@ -46,7 +46,6 @@ final class PostgresSchemaGrammar extends SchemaGrammar
             $columns[] = $this->compileColumn($column);
         }
 
-        // Collect primary key columns from column definitions
         $primaryColumns = [];
         foreach ($blueprint->getColumns() as $column) {
             if ($column->getAttribute('primary') === true) {
@@ -101,7 +100,6 @@ final class PostgresSchemaGrammar extends SchemaGrammar
             }
         }
 
-        // Unique indexes need CREATE INDEX
         foreach ($blueprint->getIndexes() as $index) {
             $indexColumns = $index->getColumns();
             $columnList = is_array($indexColumns) ? $indexColumns : [$indexColumns];
@@ -211,7 +209,6 @@ final class PostgresSchemaGrammar extends SchemaGrammar
     {
         $sql = '';
 
-        // Generated columns
         /** @var string|null $virtualAs */
         $virtualAs = $column->getAttribute('virtualAs');
         /** @var string|null $storedAs */
@@ -238,9 +235,6 @@ final class PostgresSchemaGrammar extends SchemaGrammar
         return $sql;
     }
 
-    // ---------------------------------------------------------------
-    //  Internal Helpers
-    // ---------------------------------------------------------------
 
     /**
      * Check if the blueprint has an explicit primary index.

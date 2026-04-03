@@ -41,9 +41,6 @@ abstract class Grammar
         return $this->tablePrefix;
     }
 
-    // ---------------------------------------------------------------
-    //  Query Compilation
-    // ---------------------------------------------------------------
 
     /**
      * Compile a SELECT query from its component arrays.
@@ -308,9 +305,6 @@ abstract class Grammar
         return 'SELECT EXISTS(' . $sql . ') AS ' . $this->wrap('exists');
     }
 
-    // ---------------------------------------------------------------
-    //  Clause Compilation
-    // ---------------------------------------------------------------
 
     /**
      * Compile the SELECT DISTINCT keyword.
@@ -600,9 +594,6 @@ abstract class Grammar
         return 'WITH ' . ($hasRecursive ? 'RECURSIVE ' : '') . implode(', ', $parts);
     }
 
-    // ---------------------------------------------------------------
-    //  Where Type Compilation
-    // ---------------------------------------------------------------
 
     /**
      * Compile a basic where clause (column operator value).
@@ -878,9 +869,6 @@ abstract class Grammar
         return '(' . $query . ')';
     }
 
-    // ---------------------------------------------------------------
-    //  Quoting
-    // ---------------------------------------------------------------
 
     /**
      * Wrap a table name with the table prefix and quoting.
@@ -905,7 +893,6 @@ abstract class Grammar
             return $value;
         }
 
-        // Handle aliased values: "column as alias"
         $lower = strtolower($value);
         $asPos = strpos($lower, ' as ');
         if ($asPos !== false) {
@@ -917,7 +904,6 @@ abstract class Grammar
             return $this->wrap(trim($segments[0])) . ' AS ' . $this->wrapColumn(trim($segments[1]));
         }
 
-        // Handle dot-separated segments: "table.column"
         if (str_contains($value, '.')) {
             $parts = explode('.', $value);
             $wrapped = [];

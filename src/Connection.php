@@ -212,9 +212,6 @@ final class Connection
         return $this->connected;
     }
 
-    // ---------------------------------------------------------------
-    //  Raw query methods
-    // ---------------------------------------------------------------
 
     /**
      * Execute a SELECT query and return a ResultSet.
@@ -368,9 +365,6 @@ final class Connection
         }
     }
 
-    // ---------------------------------------------------------------
-    //  Transactions
-    // ---------------------------------------------------------------
 
     /**
      * Execute a callback within a transaction, with optional deadlock retry.
@@ -463,9 +457,6 @@ final class Connection
         return $this->dbal->getTransactionNestingLevel();
     }
 
-    // ---------------------------------------------------------------
-    //  Query log
-    // ---------------------------------------------------------------
 
     /**
      * Enable query logging.
@@ -509,9 +500,6 @@ final class Connection
         return $this->queryLog;
     }
 
-    // ---------------------------------------------------------------
-    //  Escape hatches
-    // ---------------------------------------------------------------
 
     /**
      * Get the underlying Doctrine DBAL connection.
@@ -543,9 +531,6 @@ final class Connection
         return $native;
     }
 
-    // ---------------------------------------------------------------
-    //  Info
-    // ---------------------------------------------------------------
 
     /**
      * Get the configured driver name.
@@ -571,9 +556,6 @@ final class Connection
         return $this->config->prefix;
     }
 
-    // ---------------------------------------------------------------
-    //  Utility
-    // ---------------------------------------------------------------
 
     /**
      * Create a raw SQL expression.
@@ -622,9 +604,6 @@ final class Connection
         return new SchemaBuilder($this, $schemaGrammar);
     }
 
-    // ---------------------------------------------------------------
-    //  Read/write splitting
-    // ---------------------------------------------------------------
 
     /**
      * Get the appropriate DBAL connection for read queries.
@@ -833,9 +812,6 @@ final class Connection
         }
     }
 
-    // ---------------------------------------------------------------
-    //  Internal
-    // ---------------------------------------------------------------
 
     /**
      * Determine if the given exception indicates a lost connection.

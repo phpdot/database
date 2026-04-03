@@ -175,7 +175,6 @@ final class Migrator
                     }
                 }
             } catch (Throwable) {
-                // Schema changes may fail in pretend if table already exists, etc.
             }
 
             $this->connection->rollBack();
@@ -232,9 +231,6 @@ final class Migrator
         return $result;
     }
 
-    // ---------------------------------------------------------------
-    //  Internal
-    // ---------------------------------------------------------------
 
     /**
      * Ensure the migrations repository exists.

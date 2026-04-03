@@ -24,9 +24,6 @@ abstract class SchemaGrammar
 {
     protected string $tablePrefix = '';
 
-    // ---------------------------------------------------------------
-    //  Abstract Methods
-    // ---------------------------------------------------------------
 
     /**
      * Compile a CREATE TABLE statement from a blueprint.
@@ -81,9 +78,6 @@ abstract class SchemaGrammar
      */
     abstract protected function compileColumnModifiers(ColumnDefinition $column): string;
 
-    // ---------------------------------------------------------------
-    //  Public Helpers
-    // ---------------------------------------------------------------
 
     /**
      * Set the table prefix for all compiled statements.
@@ -119,9 +113,6 @@ abstract class SchemaGrammar
         return '`' . str_replace('`', '``', $column) . '`';
     }
 
-    // ---------------------------------------------------------------
-    //  Protected Helpers
-    // ---------------------------------------------------------------
 
     /**
      * Compile a single column definition (type + modifiers).

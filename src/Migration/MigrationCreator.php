@@ -101,6 +101,7 @@ final class MigrationCreator
 
             return new class extends Migration
             {
+                /** {@inheritDoc} */
                 public function up(SchemaBuilder \$schema): void
                 {
                     \$schema->create('{$table}', static function (Blueprint \$table): void {
@@ -109,6 +110,7 @@ final class MigrationCreator
                     });
                 }
 
+                /** {@inheritDoc} */
                 public function down(SchemaBuilder \$schema): void
                 {
                     \$schema->dropIfExists('{$table}');
@@ -136,6 +138,7 @@ final class MigrationCreator
 
             return new class extends Migration
             {
+                /** {@inheritDoc} */
                 public function up(SchemaBuilder \$schema): void
                 {
                     \$schema->table('{$table}', static function (Blueprint \$table): void {
@@ -143,6 +146,7 @@ final class MigrationCreator
                     });
                 }
 
+                /** {@inheritDoc} */
                 public function down(SchemaBuilder \$schema): void
                 {
                     \$schema->table('{$table}', static function (Blueprint \$table): void {
@@ -169,11 +173,13 @@ final class MigrationCreator
 
             return new class extends Migration
             {
+                /** {@inheritDoc} */
                 public function up(SchemaBuilder $schema): void
                 {
                     //
                 }
 
+                /** {@inheritDoc} */
                 public function down(SchemaBuilder $schema): void
                 {
                     //
