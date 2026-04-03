@@ -32,46 +32,126 @@ $users = $db->table('users')->where('active', true)->get();
 
 ```mermaid
 graph TD
-    subgraph Connection
-        direction TB
-        CONN[Connect, reconnect, read/write split]
-        subgraph Query Layer
-            direction LR
-            QB[Query Builder<br/><br/>Fluent API:<br/>select, where, join,<br/>insert, update, delete]
-            GR[Grammar<br/><br/>MySQL, PostgreSQL,<br/>SQLite dialect<br/>compilation]
-        end
-        subgraph Schema Layer
-            direction LR
-            SB[Schema Builder<br/><br/>create, alter, drop,<br/>introspection]
-            SG[Schema Grammar<br/><br/>DDL compilation<br/>per dialect]
-        end
-        QB --> GR
-        SB --> SG
-        CONN --> QB
-        CONN --> SB
+    subgraph Connection Layer
+        DM[DatabaseManager<br/>multi-connection management]
+        CONN[Connection<br/>lazy connect · auto-reconnect · read/write split]
+    end
+
+    subgraph Query Engine
+        QB[Query Builder<br/>~100 methods · fluent API]
+        GR[Grammar<br/>MySQL · PostgreSQL · SQLite]
+        JC[JoinClause]
+        EX[Expression]
+    end
+
+    subgraph Schema Engine
+        SB[Schema Builder<br/>create · alter · drop · introspection]
+        BP[Blueprint<br/>column types · indexes · foreign keys]
+        SG[Schema Grammar<br/>DDL compilation per dialect]
     end
 
     subgraph Results
-        RS[ResultSet]
-        PG[Paginator]
-        CP[CursorPaginator]
+        RS[ResultSet<br/>map · filter · pluck · keyBy]
+        PG[Paginator<br/>offset-based]
+        CP[CursorPaginator<br/>cursor-based]
+        TC[TypeCaster<br/>int · bool · float · json · datetime]
     end
 
+    subgraph Migrations
+        MG[Migrator<br/>run · rollback · reset · pretend · status]
+        MR[MigrationRepository<br/>batch tracking]
+    end
+
+    DM --> CONN
+    CONN --> QB
+    CONN --> SB
+    CONN --> MG
+    QB --> GR
+    QB --> JC
+    QB --> EX
+    SB --> BP
+    SB --> SG
     QB --> RS
     QB --> PG
     QB --> CP
+    RS --> TC
+    MG --> MR
+    MG --> SB
+
+    style CONN fill:#2563eb,stroke:#1d4ed8,color:#fff
+    style DM fill:#2563eb,stroke:#1d4ed8,color:#fff
+    style QB fill:#7c3aed,stroke:#6d28d9,color:#fff
+    style GR fill:#7c3aed,stroke:#6d28d9,color:#fff
+    style JC fill:#7c3aed,stroke:#6d28d9,color:#fff
+    style EX fill:#7c3aed,stroke:#6d28d9,color:#fff
+    style SB fill:#059669,stroke:#047857,color:#fff
+    style BP fill:#059669,stroke:#047857,color:#fff
+    style SG fill:#059669,stroke:#047857,color:#fff
+    style RS fill:#d97706,stroke:#b45309,color:#fff
+    style PG fill:#d97706,stroke:#b45309,color:#fff
+    style CP fill:#d97706,stroke:#b45309,color:#fff
+    style TC fill:#d97706,stroke:#b45309,color:#fff
+    style MG fill:#dc2626,stroke:#b91c1c,color:#fff
+    style MR fill:#dc2626,stroke:#b91c1c,color:#fff
 ```
+
+### Read/Write Splitting
 
 ```mermaid
 graph LR
-    subgraph Read/Write Splitting
-        direction TB
-        APP[Application] --> CONN2[Connection]
-        CONN2 -->|SELECT| READ[Read Replica]
-        CONN2 -->|INSERT/UPDATE/DELETE| WRITE[Primary]
-        CONN2 -->|After write sticky| WRITE
-        CONN2 -->|In transaction| WRITE
-    end
+    APP[Application] --> CONN[Connection]
+
+    CONN -->|SELECT| READ[Read Replica]
+    CONN -->|INSERT / UPDATE / DELETE| WRITE[Primary]
+    CONN -->|SELECT FOR UPDATE| WRITE
+    CONN -->|Inside transaction| WRITE
+    CONN -->|After write · sticky| WRITE
+    READ -.->|Replica fails · fallback| WRITE
+
+    style APP fill:#334155,stroke:#1e293b,color:#fff
+    style CONN fill:#2563eb,stroke:#1d4ed8,color:#fff
+    style READ fill:#059669,stroke:#047857,color:#fff
+    style WRITE fill:#dc2626,stroke:#b91c1c,color:#fff
+```
+
+### Query Lifecycle
+
+```mermaid
+graph LR
+    A[Builder] -->|compile| B[Grammar]
+    B -->|SQL + bindings| C[Connection]
+    C -->|execute| D[(Database)]
+    D -->|rows| E[ResultSet]
+    E -->|optional| F[TypeCaster]
+
+    style A fill:#7c3aed,stroke:#6d28d9,color:#fff
+    style B fill:#7c3aed,stroke:#6d28d9,color:#fff
+    style C fill:#2563eb,stroke:#1d4ed8,color:#fff
+    style D fill:#334155,stroke:#1e293b,color:#fff
+    style E fill:#d97706,stroke:#b45309,color:#fff
+    style F fill:#d97706,stroke:#b45309,color:#fff
+```
+
+### Connection Resilience
+
+```mermaid
+graph TD
+    Q[Execute Query] --> TRY{Try}
+    TRY -->|Success| RES[Return Result]
+    TRY -->|Connection Lost| DETECT{gone away?<br/>broken pipe?<br/>lost connection?}
+    DETECT -->|Yes| RECONN[Reconnect<br/>exponential backoff]
+    DETECT -->|No| THROW[Throw QueryException]
+    RECONN --> RETRY{Retry Query}
+    RETRY -->|Success| RES
+    RETRY -->|Fail| THROW
+
+    style Q fill:#334155,stroke:#1e293b,color:#fff
+    style RES fill:#059669,stroke:#047857,color:#fff
+    style THROW fill:#dc2626,stroke:#b91c1c,color:#fff
+    style DETECT fill:#d97706,stroke:#b45309,color:#fff
+    style RECONN fill:#2563eb,stroke:#1d4ed8,color:#fff
+    style RETRY fill:#7c3aed,stroke:#6d28d9,color:#fff
+    style TRY fill:#334155,stroke:#1e293b,color:#fff
 ```
 
 ---
