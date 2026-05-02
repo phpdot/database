@@ -9,6 +9,9 @@ declare(strict_types=1);
 
 namespace PHPdot\Database\Config;
 
+use PHPdot\Container\Attribute\Config;
+
+#[Config('database')]
 final readonly class DatabaseConfig
 {
     /**
