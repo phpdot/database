@@ -156,6 +156,55 @@ graph TD
 
 ---
 
+## Pool Integration
+
+`Connection` instances can be pooled by any `phpdot/pool`-compatible pool through the bundled `ConnectionConnector`. The connector implements `PHPdot\Contracts\Pool\ConnectorInterface` from `phpdot/contracts`, so `phpdot/database` does not require `phpdot/pool` itself — it just declares the interface it satisfies.
+
+```php
+use PHPdot\Database\ConnectionConnector;
+use PHPdot\Database\Config\DatabaseConfig;
+use PHPdot\Pool\Pool;
+use PHPdot\Pool\PoolConfig;
+
+$pool = new Pool(
+    new ConnectionConnector(new DatabaseConfig(
+        driver: 'mysql',
+        host: 'localhost',
+        database: 'myapp',
+    )),
+    new PoolConfig(
+        minConnections: 2,
+        maxConnections: 10,
+        validateOnBorrowAfterIdle: 5.0,
+    ),
+);
+
+$pool->init();   // pre-create min connections
+```
+
+Borrow / use / release a connection:
+
+```php
+$conn = $pool->borrow();
+try {
+    $rows = $conn->table('users')->get();
+} finally {
+    $pool->release($conn);
+}
+```
+
+The connector's behavior:
+
+| Method | What it does |
+|---|---|
+| `connect()` | Build a fresh `Connection`, call `ensureConnected()`, return it. |
+| `isAlive()` | Call `Connection::ping()` (issues `SELECT 1`); returns `false` on any error. |
+| `close()` | Call `Connection::close()` — idempotent and never throws. |
+
+The `phpdot/pool` package provides validate-on-borrow with a TTL gate, optional validate-on-return, heartbeat, idle cleanup, and metrics — see its README for the full configuration surface.
+
+---
+
 ## Query Builder
 
 ### Select
