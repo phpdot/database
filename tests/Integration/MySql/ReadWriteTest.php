@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace PHPdot\Database\Tests\Integration\MySql;
 
 use PHPdot\Database\Config\DatabaseConfig;
-use PHPdot\Database\Connection;
+use PHPdot\Database\DatabaseConnection;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 
@@ -18,13 +18,13 @@ use PHPUnit\Framework\Attributes\Test;
 #[Group('mysql')]
 final class ReadWriteTest extends MySqlTestCase
 {
-    private Connection $rwDb;
+    private DatabaseConnection $rwDb;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->rwDb = new Connection(new DatabaseConfig(
+        $this->rwDb = new DatabaseConnection(new DatabaseConfig(
             driver: 'mysql',
             host: 'localhost',
             port: 3306,
@@ -93,7 +93,7 @@ final class ReadWriteTest extends MySqlTestCase
         $this->createUsersTable();
         $this->seedUsers();
 
-        $this->rwDb->transaction(function (Connection $conn): void {
+        $this->rwDb->transaction(function (DatabaseConnection $conn): void {
             $result = $conn->select('SELECT COUNT(*) as cnt FROM users');
             self::assertSame(5, (int) $result->value('cnt'));
 

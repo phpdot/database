@@ -11,7 +11,7 @@ namespace PHPdot\Database\Query;
 
 use Closure;
 use Generator;
-use PHPdot\Database\Connection;
+use PHPdot\Database\DatabaseConnection;
 use PHPdot\Database\Exception\RecordNotFoundException;
 use PHPdot\Database\Query\Grammar\Grammar;
 use PHPdot\Database\Result\CursorPaginator;
@@ -83,11 +83,11 @@ final class Builder
     private array $casts = [];
 
     /**
-     * @param Connection $connection The database connection
+     * @param DatabaseConnection $connection The database connection
      * @param Grammar $grammar The SQL grammar for compilation
      */
     public function __construct(
-        private Connection $connection,
+        private DatabaseConnection $connection,
         private Grammar $grammar,
     ) {}
 

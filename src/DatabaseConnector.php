@@ -3,10 +3,10 @@
 declare(strict_types=1);
 
 /**
- * Adapts `phpdot/database`'s `Connection` to `phpdot/pool`'s connector contract.
+ * Adapts `phpdot/database`'s `DatabaseConnection` to `phpdot/pool`'s connector contract.
  *
- * Lets any pool (e.g., `phpdot/pool`) hold and manage `Connection` instances:
- * `connect()` builds a fresh `Connection` and ensures it's connected; `isAlive()`
+ * Lets any pool (e.g., `phpdot/pool`) hold and manage `DatabaseConnection` instances:
+ * `connect()` builds a fresh `DatabaseConnection` and ensures it's connected; `isAlive()`
  * issues a `SELECT 1` ping; `close()` shuts the underlying DBAL connection down.
  *
  * The connector itself depends only on `PHPdot\Contracts\Pool\ConnectorInterface`
@@ -24,7 +24,7 @@ use PHPdot\Database\Config\DatabaseConfig;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
-final class ConnectionConnector implements ConnectorInterface
+final class DatabaseConnector implements ConnectorInterface
 {
     private readonly LoggerInterface $logger;
 
@@ -36,11 +36,11 @@ final class ConnectionConnector implements ConnectorInterface
     }
 
     /**
-     * Build a fresh `Connection`, ensuring it is connected before handing back.
+     * Build a fresh `DatabaseConnection`, ensuring it is connected before handing back.
      */
     public function connect(): object
     {
-        $connection = new Connection($this->config, $this->logger);
+        $connection = new DatabaseConnection($this->config, $this->logger);
         $connection->ensureConnected();
 
         return $connection;
@@ -51,7 +51,7 @@ final class ConnectionConnector implements ConnectorInterface
      */
     public function isAlive(object $connection): bool
     {
-        if (!$connection instanceof Connection) {
+        if (!$connection instanceof DatabaseConnection) {
             return false;
         }
 
@@ -67,7 +67,7 @@ final class ConnectionConnector implements ConnectorInterface
      */
     public function close(object $connection): void
     {
-        if (!$connection instanceof Connection) {
+        if (!$connection instanceof DatabaseConnection) {
             return;
         }
 

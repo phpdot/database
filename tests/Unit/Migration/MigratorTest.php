@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace PHPdot\Database\Tests\Unit\Migration;
 
 use PHPdot\Database\Config\DatabaseConfig;
-use PHPdot\Database\Connection;
+use PHPdot\Database\DatabaseConnection;
 use PHPdot\Database\Migration\MigrationRepository;
 use PHPdot\Database\Migration\Migrator;
 use PHPUnit\Framework\Attributes\Test;
@@ -13,7 +13,7 @@ use PHPUnit\Framework\TestCase;
 
 final class MigratorTest extends TestCase
 {
-    private Connection $connection;
+    private DatabaseConnection $connection;
 
     private MigrationRepository $repository;
 
@@ -23,7 +23,7 @@ final class MigratorTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->connection = new Connection(new DatabaseConfig(
+        $this->connection = new DatabaseConnection(new DatabaseConfig(
             driver: 'sqlite',
             database: ':memory:',
         ));

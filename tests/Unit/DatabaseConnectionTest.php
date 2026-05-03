@@ -6,7 +6,7 @@ namespace PHPdot\Database\Tests\Unit;
 
 use PDO;
 use PHPdot\Database\Config\DatabaseConfig;
-use PHPdot\Database\Connection;
+use PHPdot\Database\DatabaseConnection;
 use PHPdot\Database\Exception\QueryException;
 use PHPdot\Database\Query\Expression;
 use PHPdot\Database\Result\ResultSet;
@@ -14,13 +14,13 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 
-final class ConnectionTest extends TestCase
+final class DatabaseConnectionTest extends TestCase
 {
-    private Connection $connection;
+    private DatabaseConnection $connection;
 
     protected function setUp(): void
     {
-        $this->connection = new Connection(new DatabaseConfig(
+        $this->connection = new DatabaseConnection(new DatabaseConfig(
             driver: 'sqlite',
             database: ':memory:',
         ));
@@ -141,7 +141,7 @@ final class ConnectionTest extends TestCase
     #[Test]
     public function transactionCommitsOnSuccess(): void
     {
-        $result = $this->connection->transaction(function (Connection $conn): string {
+        $result = $this->connection->transaction(function (DatabaseConnection $conn): string {
             $conn->insert(
                 'INSERT INTO test_users (name, email) VALUES (?, ?)',
                 ['Charlie', 'charlie@example.com'],
@@ -160,7 +160,7 @@ final class ConnectionTest extends TestCase
     public function transactionRollsBackOnException(): void
     {
         try {
-            $this->connection->transaction(function (Connection $conn): void {
+            $this->connection->transaction(function (DatabaseConnection $conn): void {
                 $conn->insert(
                     'INSERT INTO test_users (name, email) VALUES (?, ?)',
                     ['Charlie', 'charlie@example.com'],
@@ -219,7 +219,7 @@ final class ConnectionTest extends TestCase
     #[Test]
     public function transactionLevelReturnsZeroWhenNotConnected(): void
     {
-        $conn = new Connection(new DatabaseConfig(
+        $conn = new DatabaseConnection(new DatabaseConfig(
             driver: 'sqlite',
             database: ':memory:',
         ));
@@ -228,7 +228,7 @@ final class ConnectionTest extends TestCase
     }
 
     // ---------------------------------------------------------------
-    //  Connection state
+    //  DatabaseConnection state
     // ---------------------------------------------------------------
 
     #[Test]
@@ -242,7 +242,7 @@ final class ConnectionTest extends TestCase
     #[Test]
     public function isConnectedReturnsFalseBeforeFirstQuery(): void
     {
-        $conn = new Connection(new DatabaseConfig(
+        $conn = new DatabaseConnection(new DatabaseConfig(
             driver: 'sqlite',
             database: ':memory:',
         ));
@@ -259,7 +259,7 @@ final class ConnectionTest extends TestCase
     #[Test]
     public function ensureConnectedConnectsLazily(): void
     {
-        $conn = new Connection(new DatabaseConfig(
+        $conn = new DatabaseConnection(new DatabaseConfig(
             driver: 'sqlite',
             database: ':memory:',
         ));
@@ -290,7 +290,7 @@ final class ConnectionTest extends TestCase
     #[Test]
     public function getTablePrefixReturnsConfiguredPrefix(): void
     {
-        $conn = new Connection(new DatabaseConfig(
+        $conn = new DatabaseConnection(new DatabaseConfig(
             driver: 'sqlite',
             database: ':memory:',
             prefix: 'app_',
@@ -409,7 +409,7 @@ final class ConnectionTest extends TestCase
     #[Test]
     public function closeOnAlreadyClosedConnectionDoesNothing(): void
     {
-        $conn = new Connection(new DatabaseConfig(
+        $conn = new DatabaseConnection(new DatabaseConfig(
             driver: 'sqlite',
             database: ':memory:',
         ));
@@ -434,7 +434,7 @@ final class ConnectionTest extends TestCase
     #[Test]
     public function pingReturnsFalseWhenNotConnected(): void
     {
-        $conn = new Connection(new DatabaseConfig(
+        $conn = new DatabaseConnection(new DatabaseConfig(
             driver: 'sqlite',
             database: ':memory:',
         ));

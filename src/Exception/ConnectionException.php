@@ -39,7 +39,7 @@ final class ConnectionException extends DatabaseException
     public static function disconnected(string $error): self
     {
         return new self(
-            sprintf('Connection lost: %s', $error),
+            sprintf('DatabaseConnection lost: %s', $error),
         );
     }
 }

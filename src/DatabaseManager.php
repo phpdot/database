@@ -28,7 +28,7 @@ use Psr\Log\NullLogger;
  */
 final class DatabaseManager
 {
-    /** @var array<string, Connection> */
+    /** @var array<string, DatabaseConnection> */
     private array $connections = [];
 
     /**
@@ -48,7 +48,7 @@ final class DatabaseManager
      * @param string $name The connection name (empty string resolves to default)
      * @throws ConnectionException When no configuration exists for the given name
      */
-    public function connection(string $name = ''): Connection
+    public function connection(string $name = ''): DatabaseConnection
     {
         $name = $name !== '' ? $name : $this->default;
 
@@ -57,7 +57,7 @@ final class DatabaseManager
                 throw ConnectionException::connectionFailed($name, $name, "No configuration for connection '{$name}'");
             }
 
-            $this->connections[$name] = new Connection($this->configs[$name], $this->logger);
+            $this->connections[$name] = new DatabaseConnection($this->configs[$name], $this->logger);
         }
 
         return $this->connections[$name];
@@ -121,7 +121,7 @@ final class DatabaseManager
      * Execute a callback within a transaction on the default connection.
      *
      * @template T
-     * @param Closure(Connection): T $callback
+     * @param Closure(DatabaseConnection): T $callback
      * @param int $maxRetries Maximum number of attempts (for deadlock retry)
      * @return T
      */
@@ -169,7 +169,7 @@ final class DatabaseManager
     /**
      * Get all resolved connections.
      *
-     * @return array<string, Connection>
+     * @return array<string, DatabaseConnection>
      */
     public function getConnections(): array
     {
@@ -197,7 +197,7 @@ final class DatabaseManager
      * @param string $name The connection name (empty string resolves to default)
      * @throws ConnectionException When no configuration exists for the given name
      */
-    public function reconnect(string $name = ''): Connection
+    public function reconnect(string $name = ''): DatabaseConnection
     {
         $this->disconnect($name);
 

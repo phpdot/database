@@ -20,7 +20,7 @@ final class ConnectionResilienceTest extends MySqlTestCase
     public function testIsConnectedReturnsFalseBeforeQueries(): void
     {
         // Create a fresh connection that hasn't been used yet
-        $fresh = new \PHPdot\Database\Connection(new \PHPdot\Database\Config\DatabaseConfig(
+        $fresh = new \PHPdot\Database\DatabaseConnection(new \PHPdot\Database\Config\DatabaseConfig(
             driver: 'mysql',
             host: 'localhost',
             port: 3306,
@@ -34,7 +34,7 @@ final class ConnectionResilienceTest extends MySqlTestCase
 
     public function testEnsureConnectedConnectsLazily(): void
     {
-        $fresh = new \PHPdot\Database\Connection(new \PHPdot\Database\Config\DatabaseConfig(
+        $fresh = new \PHPdot\Database\DatabaseConnection(new \PHPdot\Database\Config\DatabaseConfig(
             driver: 'mysql',
             host: 'localhost',
             port: 3306,

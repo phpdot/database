@@ -9,7 +9,7 @@ declare(strict_types=1);
 
 namespace PHPdot\Database\Migration;
 
-use PHPdot\Database\Connection;
+use PHPdot\Database\DatabaseConnection;
 use PHPdot\Database\Exception\MigrationException;
 use PHPdot\Database\Schema\SchemaBuilder;
 use Throwable;
@@ -23,11 +23,11 @@ use Throwable;
 final class Migrator
 {
     /**
-     * @param Connection $connection The database connection
+     * @param DatabaseConnection $connection The database connection
      * @param MigrationRepository $repository The migration state repository
      */
     public function __construct(
-        private readonly Connection $connection,
+        private readonly DatabaseConnection $connection,
         private readonly MigrationRepository $repository,
     ) {}
 

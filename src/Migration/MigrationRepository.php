@@ -9,7 +9,7 @@ declare(strict_types=1);
 
 namespace PHPdot\Database\Migration;
 
-use PHPdot\Database\Connection;
+use PHPdot\Database\DatabaseConnection;
 use PHPdot\Database\Exception\MigrationException;
 
 /**
@@ -23,11 +23,11 @@ final class MigrationRepository
     private readonly string $table;
 
     /**
-     * @param Connection $connection The database connection
+     * @param DatabaseConnection $connection The database connection
      * @param string $table The migrations table name
      */
     public function __construct(
-        private readonly Connection $connection,
+        private readonly DatabaseConnection $connection,
         string $table = 'migrations',
     ) {
         $this->table = $connection->getTablePrefix() . $table;

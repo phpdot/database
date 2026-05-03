@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace PHPdot\Database\Tests\Unit;
 
 use PHPdot\Database\Config\DatabaseConfig;
-use PHPdot\Database\Connection;
+use PHPdot\Database\DatabaseConnection;
 use PHPdot\Database\DatabaseManager;
 use PHPdot\Database\Exception\ConnectionException;
 use PHPdot\Database\Query\Builder;
@@ -35,7 +35,7 @@ final class DatabaseManagerTest extends TestCase
     {
         $connection = $this->manager->connection();
 
-        self::assertInstanceOf(Connection::class, $connection);
+        self::assertInstanceOf(DatabaseConnection::class, $connection);
     }
 
     #[Test]
@@ -120,7 +120,7 @@ final class DatabaseManagerTest extends TestCase
         $connection = $this->manager->connection();
         $connection->unprepared('CREATE TABLE test_table (id INTEGER PRIMARY KEY, name TEXT)');
 
-        $result = $this->manager->transaction(function (Connection $conn): string {
+        $result = $this->manager->transaction(function (DatabaseConnection $conn): string {
             $conn->insert('INSERT INTO test_table (name) VALUES (?)', ['Alice']);
 
             return 'done';
@@ -198,7 +198,7 @@ final class DatabaseManagerTest extends TestCase
         $original = $this->manager->connection();
         $reconnected = $this->manager->reconnect();
 
-        self::assertInstanceOf(Connection::class, $reconnected);
+        self::assertInstanceOf(DatabaseConnection::class, $reconnected);
         self::assertNotSame($original, $reconnected);
     }
 

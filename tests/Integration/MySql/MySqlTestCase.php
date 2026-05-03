@@ -5,18 +5,18 @@ declare(strict_types=1);
 namespace PHPdot\Database\Tests\Integration\MySql;
 
 use PHPdot\Database\Config\DatabaseConfig;
-use PHPdot\Database\Connection;
+use PHPdot\Database\DatabaseConnection;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 
 #[Group('mysql')]
 abstract class MySqlTestCase extends TestCase
 {
-    protected Connection $db;
+    protected DatabaseConnection $db;
 
     protected function setUp(): void
     {
-        $this->db = new Connection(new DatabaseConfig(
+        $this->db = new DatabaseConnection(new DatabaseConfig(
             driver: 'mysql',
             host: 'localhost',
             port: 3306,

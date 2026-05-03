@@ -10,23 +10,23 @@ declare(strict_types=1);
 namespace PHPdot\Database\Schema;
 
 use Closure;
-use PHPdot\Database\Connection;
+use PHPdot\Database\DatabaseConnection;
 use PHPdot\Database\Schema\Grammar\SchemaGrammar;
 
 /**
  * High-level schema builder for creating, altering, and dropping tables.
  *
- * Receives a Connection and SchemaGrammar, and delegates DDL compilation
+ * Receives a DatabaseConnection and SchemaGrammar, and delegates DDL compilation
  * to the grammar while executing the resulting SQL through the connection.
  */
 final class SchemaBuilder
 {
     /**
-     * @param Connection $connection The database connection
+     * @param DatabaseConnection $connection The database connection
      * @param SchemaGrammar $grammar The schema grammar for DDL compilation
      */
     public function __construct(
-        private readonly Connection $connection,
+        private readonly DatabaseConnection $connection,
         private readonly SchemaGrammar $grammar,
     ) {}
 
@@ -210,7 +210,7 @@ final class SchemaBuilder
     /**
      * Get the underlying database connection.
      */
-    public function getConnection(): Connection
+    public function getConnection(): DatabaseConnection
     {
         return $this->connection;
     }

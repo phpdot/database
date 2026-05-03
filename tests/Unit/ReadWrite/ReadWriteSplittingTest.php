@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace PHPdot\Database\Tests\Unit\ReadWrite;
 
 use PHPdot\Database\Config\DatabaseConfig;
-use PHPdot\Database\Connection;
+use PHPdot\Database\DatabaseConnection;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
@@ -14,7 +14,7 @@ use PHPUnit\Framework\TestCase;
  *
  * Uses SQLite in-memory for the primary connection. Since SQLite does not
  * support read replicas, these tests verify the routing logic by observing
- * Connection state (recordsModified flag, forceWriteConnection, close resets).
+ * DatabaseConnection state (recordsModified flag, forceWriteConnection, close resets).
  */
 final class ReadWriteSplittingTest extends TestCase
 {
@@ -112,7 +112,7 @@ final class ReadWriteSplittingTest extends TestCase
     #[Test]
     public function insertThenSelectWorksWithStickyConfig(): void
     {
-        $conn = new Connection(new DatabaseConfig(
+        $conn = new DatabaseConnection(new DatabaseConfig(
             driver: 'sqlite',
             database: ':memory:',
         ));
@@ -138,7 +138,7 @@ final class ReadWriteSplittingTest extends TestCase
         // recordsModified is already true from unprepared, verify transaction keeps it true
         self::assertTrue($conn->hasModifiedRecords());
 
-        $conn->transaction(function (Connection $c): void {
+        $conn->transaction(function (DatabaseConnection $c): void {
             $c->insert('INSERT INTO t (id) VALUES (?)', [1]);
         });
 
@@ -195,9 +195,9 @@ final class ReadWriteSplittingTest extends TestCase
         $conn->close();
     }
 
-    private function createConnection(): Connection
+    private function createConnection(): DatabaseConnection
     {
-        return new Connection(new DatabaseConfig(
+        return new DatabaseConnection(new DatabaseConfig(
             driver: 'sqlite',
             database: ':memory:',
         ));

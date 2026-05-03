@@ -6,19 +6,19 @@ namespace PHPdot\Database\Tests\Unit;
 
 use PHPdot\Contracts\Pool\ConnectorInterface;
 use PHPdot\Database\Config\DatabaseConfig;
-use PHPdot\Database\Connection;
-use PHPdot\Database\ConnectionConnector;
+use PHPdot\Database\DatabaseConnection;
+use PHPdot\Database\DatabaseConnector;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 
-final class ConnectionConnectorTest extends TestCase
+final class DatabaseConnectorTest extends TestCase
 {
-    private ConnectionConnector $connector;
+    private DatabaseConnector $connector;
 
     protected function setUp(): void
     {
-        $this->connector = new ConnectionConnector(new DatabaseConfig(
+        $this->connector = new DatabaseConnector(new DatabaseConfig(
             driver: 'sqlite',
             database: ':memory:',
         ));
@@ -35,7 +35,7 @@ final class ConnectionConnectorTest extends TestCase
     {
         $connection = $this->connector->connect();
 
-        self::assertInstanceOf(Connection::class, $connection);
+        self::assertInstanceOf(DatabaseConnection::class, $connection);
         self::assertTrue($connection->isConnected());
 
         $this->connector->close($connection);

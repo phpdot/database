@@ -43,11 +43,11 @@ final class ExceptionTest extends TestCase
     #[Test]
     public function connectionFailedContainsDriverHostAndError(): void
     {
-        $exception = ConnectionException::connectionFailed('mysql', '10.0.0.1', 'Connection refused');
+        $exception = ConnectionException::connectionFailed('mysql', '10.0.0.1', 'DatabaseConnection refused');
 
         self::assertStringContainsString('mysql', $exception->getMessage());
         self::assertStringContainsString('10.0.0.1', $exception->getMessage());
-        self::assertStringContainsString('Connection refused', $exception->getMessage());
+        self::assertStringContainsString('DatabaseConnection refused', $exception->getMessage());
     }
 
     #[Test]

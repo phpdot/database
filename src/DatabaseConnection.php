@@ -39,7 +39,7 @@ use Throwable;
  * Provides lazy connection, automatic reconnection with exponential backoff,
  * query logging, transaction management with deadlock retry, and raw query methods.
  */
-final class Connection
+final class DatabaseConnection
 {
     private DbalConnection $dbal;
 
@@ -370,7 +370,7 @@ final class Connection
      * Execute a callback within a transaction, with optional deadlock retry.
      *
      * @template T
-     * @param Closure(Connection): T $callback
+     * @param Closure(DatabaseConnection): T $callback
      * @param int $maxRetries Maximum number of attempts (for deadlock retry)
      * @throws Throwable When the transaction fails after all retries
      * @return T

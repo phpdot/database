@@ -5,16 +5,16 @@ declare(strict_types=1);
 namespace PHPdot\Database\Tests\Integration\Sqlite;
 
 use PHPdot\Database\Config\DatabaseConfig;
-use PHPdot\Database\Connection;
+use PHPdot\Database\DatabaseConnection;
 use PHPUnit\Framework\TestCase;
 
 abstract class SqliteTestCase extends TestCase
 {
-    protected Connection $db;
+    protected DatabaseConnection $db;
 
     protected function setUp(): void
     {
-        $this->db = new Connection(new DatabaseConfig(
+        $this->db = new DatabaseConnection(new DatabaseConfig(
             driver: 'sqlite',
             database: ':memory:',
         ));

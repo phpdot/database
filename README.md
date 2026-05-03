@@ -13,10 +13,10 @@ Supports MySQL 5.7+, MariaDB 10.4+, PostgreSQL 12+, SQLite 3.25+.
 ## Quick Start
 
 ```php
-use PHPdot\Database\Connection;
+use PHPdot\Database\DatabaseConnection;
 use PHPdot\Database\Config\DatabaseConfig;
 
-$db = new Connection(new DatabaseConfig(
+$db = new DatabaseConnection(new DatabaseConfig(
     driver: 'mysql',
     host: 'localhost',
     database: 'myapp',
@@ -32,9 +32,9 @@ $users = $db->table('users')->where('active', true)->get();
 
 ```mermaid
 graph TD
-    subgraph Connection Layer
+    subgraph DatabaseConnection Layer
         DM[DatabaseManager<br/>multi-connection management]
-        CONN[Connection<br/>lazy connect · auto-reconnect · read/write split]
+        CONN[DatabaseConnection<br/>lazy connect · auto-reconnect · read/write split]
     end
 
     subgraph Query Engine
@@ -99,7 +99,7 @@ graph TD
 
 ```mermaid
 graph LR
-    APP[Application] --> CONN[Connection]
+    APP[Application] --> CONN[DatabaseConnection]
 
     CONN -->|SELECT| READ[Read Replica]
     CONN -->|INSERT / UPDATE / DELETE| WRITE[Primary]
@@ -119,7 +119,7 @@ graph LR
 ```mermaid
 graph LR
     A[Builder] -->|compile| B[Grammar]
-    B -->|SQL + bindings| C[Connection]
+    B -->|SQL + bindings| C[DatabaseConnection]
     C -->|execute| D[(Database)]
     D -->|rows| E[ResultSet]
     E -->|optional| F[TypeCaster]
@@ -132,13 +132,13 @@ graph LR
     style F fill:#d97706,stroke:#b45309,color:#fff
 ```
 
-### Connection Resilience
+### DatabaseConnection Resilience
 
 ```mermaid
 graph TD
     Q[Execute Query] --> TRY{Try}
     TRY -->|Success| RES[Return Result]
-    TRY -->|Connection Lost| DETECT{gone away?<br/>broken pipe?<br/>lost connection?}
+    TRY -->|DatabaseConnection Lost| DETECT{gone away?<br/>broken pipe?<br/>lost connection?}
     DETECT -->|Yes| RECONN[Reconnect<br/>exponential backoff]
     DETECT -->|No| THROW[Throw QueryException]
     RECONN --> RETRY{Retry Query}
@@ -158,16 +158,16 @@ graph TD
 
 ## Pool Integration
 
-`Connection` instances can be pooled by any `phpdot/pool`-compatible pool through the bundled `ConnectionConnector`. The connector implements `PHPdot\Contracts\Pool\ConnectorInterface` from `phpdot/contracts`, so `phpdot/database` does not require `phpdot/pool` itself — it just declares the interface it satisfies.
+`DatabaseConnection` instances can be pooled by any `phpdot/pool`-compatible pool through the bundled `DatabaseConnector`. The connector implements `PHPdot\Contracts\Pool\ConnectorInterface` from `phpdot/contracts`, so `phpdot/database` does not require `phpdot/pool` itself — it just declares the interface it satisfies.
 
 ```php
-use PHPdot\Database\ConnectionConnector;
+use PHPdot\Database\DatabaseConnector;
 use PHPdot\Database\Config\DatabaseConfig;
 use PHPdot\Pool\Pool;
 use PHPdot\Pool\PoolConfig;
 
 $pool = new Pool(
-    new ConnectionConnector(new DatabaseConfig(
+    new DatabaseConnector(new DatabaseConfig(
         driver: 'mysql',
         host: 'localhost',
         database: 'myapp',
@@ -197,9 +197,9 @@ The connector's behavior:
 
 | Method | What it does |
 |---|---|
-| `connect()` | Build a fresh `Connection`, call `ensureConnected()`, return it. |
-| `isAlive()` | Call `Connection::ping()` (issues `SELECT 1`); returns `false` on any error. |
-| `close()` | Call `Connection::close()` — idempotent and never throws. |
+| `connect()` | Build a fresh `DatabaseConnection`, call `ensureConnected()`, return it. |
+| `isAlive()` | Call `DatabaseConnection::ping()` (issues `SELECT 1`); returns `false` on any error. |
+| `close()` | Call `DatabaseConnection::close()` — idempotent and never throws. |
 
 The `phpdot/pool` package provides validate-on-borrow with a TTL gate, optional validate-on-return, heartbeat, idle cleanup, and metrics — see its README for the full configuration surface.
 
@@ -433,7 +433,7 @@ $db->transaction(fn($conn) => ..., maxRetries: 3);
 ## Read/Write Splitting
 
 ```php
-$db = new Connection(new DatabaseConfig(
+$db = new DatabaseConnection(new DatabaseConfig(
     driver: 'mysql',
     host: 'primary.db.internal',
     database: 'myapp',
@@ -449,12 +449,12 @@ SELECTs go to a random replica. Writes go to primary. After any write with stick
 
 ---
 
-## Connection Resilience
+## DatabaseConnection Resilience
 
 Auto-reconnect with exponential backoff. Handles disconnections transparently.
 
 ```php
-$db = new Connection(new DatabaseConfig(
+$db = new DatabaseConnection(new DatabaseConfig(
     maxRetries: 3,
     retryDelayMs: 200,
 ));
@@ -480,7 +480,7 @@ $manager->connection('analytics')->table('events')->get();
 
 ```
 src/
-├── Connection.php
+├── DatabaseConnection.php
 ├── DatabaseManager.php
 ├── Config/
 │   └── DatabaseConfig.php

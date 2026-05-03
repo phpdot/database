@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace PHPdot\Database\Tests\Unit\Query;
 
 use PHPdot\Database\Config\DatabaseConfig;
-use PHPdot\Database\Connection;
+use PHPdot\Database\DatabaseConnection;
 use PHPdot\Database\Query\Builder;
 use PHPdot\Database\Query\Expression;
 use PHPdot\Database\Query\Grammar\MySqlGrammar;
@@ -22,7 +22,7 @@ final class BuilderSelectTest extends TestCase
 
     private function newBuilder(string $table = ''): Builder
     {
-        $connection = new Connection(new DatabaseConfig(driver: 'mysql', database: ':memory:'));
+        $connection = new DatabaseConnection(new DatabaseConfig(driver: 'mysql', database: ':memory:'));
         $grammar = new MySqlGrammar();
         $builder = new Builder($connection, $grammar);
 
