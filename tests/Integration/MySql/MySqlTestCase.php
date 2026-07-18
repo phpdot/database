@@ -17,15 +17,15 @@ abstract class MySqlTestCase extends TestCase
     protected function setUp(): void
     {
         $this->db = new DatabaseConnection(new MySqlConfig(
-            host: 'localhost',
-            port: 3306,
-            database: 'phpdot_test',
-            username: 'root',
-            password: 'root',
+            host: getenv('MYSQL_HOST') ?: '127.0.0.1',
+            port: (int) (getenv('MYSQL_PORT') ?: 3306),
+            database: getenv('MYSQL_DB') ?: 'phpdot_test',
+            username: getenv('MYSQL_USER') ?: 'root',
+            password: getenv('MYSQL_PASS') ?: 'root',
         ));
 
         try {
-            $this->db->unprepared('SELECT 1');
+            $this->db->select('SELECT 1');
         } catch (\Throwable $e) {
             $this->markTestSkipped('MySQL is not available: ' . $e->getMessage());
         }

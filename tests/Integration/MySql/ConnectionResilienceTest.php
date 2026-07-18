@@ -20,8 +20,8 @@ final class ConnectionResilienceTest extends MySqlTestCase
     public function testIsConnectedReturnsFalseBeforeQueries(): void
     {
         $fresh = new \PHPdot\Database\DatabaseConnection(new \PHPdot\Database\Connection\MySql\MySqlConfig(
-            host: 'localhost',
-            port: 3306,
+            host: getenv('MYSQL_HOST') ?: '127.0.0.1',
+            port: (int) (getenv('MYSQL_PORT') ?: 3306),
             database: 'phpdot_test',
             username: 'root',
             password: 'root',
@@ -33,8 +33,8 @@ final class ConnectionResilienceTest extends MySqlTestCase
     public function testEnsureConnectedConnectsLazily(): void
     {
         $fresh = new \PHPdot\Database\DatabaseConnection(new \PHPdot\Database\Connection\MySql\MySqlConfig(
-            host: 'localhost',
-            port: 3306,
+            host: getenv('MYSQL_HOST') ?: '127.0.0.1',
+            port: (int) (getenv('MYSQL_PORT') ?: 3306),
             database: 'phpdot_test',
             username: 'root',
             password: 'root',

@@ -25,7 +25,7 @@ abstract class PostgreSqlTestCase extends TestCase
         ));
 
         try {
-            $this->db->unprepared('SELECT 1');
+            $this->db->select('SELECT 1');
         } catch (\Throwable $e) {
             $this->markTestSkipped('PostgreSQL is not available: ' . $e->getMessage());
         }

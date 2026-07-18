@@ -50,7 +50,7 @@ final class QueryBuilderTest extends PostgreSqlTestCase
         $this->createUsersTable();
         $this->seedUsers();
 
-        self::assertSame(1, $this->db->table('users')->whereJsonContains('tags', '["vip"]')->count());
+        self::assertSame(1, $this->db->table('users')->whereJsonContains('tags', ['vip'])->count());
         self::assertSame(5, $this->db->table('users')->whereJsonLength('tags', '>=', 1)->count());
     }
 
