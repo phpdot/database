@@ -7,16 +7,19 @@ namespace PHPdot\Database\Tests\Integration\MySql;
 use PHPdot\Database\Exception\RecordNotFoundException;
 use PHPdot\Database\Result\ResultSet;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\Test;
 use RuntimeException;
 
 #[Group('mysql')]
+#[Group('integration')]
 final class QueryBuilderTest extends MySqlTestCase
 {
     // ---------------------------------------------------------------
     //  SELECT — get / first / firstOrFail / sole / find / value / pluck
     // ---------------------------------------------------------------
 
-    public function testGetReturnsResultSetWithCorrectData(): void
+    #[Test]
+    public function getReturnsResultSetWithCorrectData(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -28,7 +31,8 @@ final class QueryBuilderTest extends MySqlTestCase
         self::assertSame('Alice', $result->first()['name'] ?? null);
     }
 
-    public function testFirstReturnsSingleRowAsArray(): void
+    #[Test]
+    public function firstReturnsSingleRowAsArray(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -40,7 +44,8 @@ final class QueryBuilderTest extends MySqlTestCase
         self::assertSame('bob@example.com', $row['email']);
     }
 
-    public function testFirstReturnsNullWhenNoMatch(): void
+    #[Test]
+    public function firstReturnsNullWhenNoMatch(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -50,7 +55,8 @@ final class QueryBuilderTest extends MySqlTestCase
         self::assertNull($row);
     }
 
-    public function testFirstOrFailThrowsRecordNotFoundException(): void
+    #[Test]
+    public function firstOrFailThrowsRecordNotFoundException(): void
     {
         $this->createUsersTable();
 
@@ -58,7 +64,8 @@ final class QueryBuilderTest extends MySqlTestCase
         $this->db->table('users')->where('name', 'Nobody')->firstOrFail();
     }
 
-    public function testSoleReturnsExactlyOneRow(): void
+    #[Test]
+    public function soleReturnsExactlyOneRow(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -68,7 +75,8 @@ final class QueryBuilderTest extends MySqlTestCase
         self::assertSame('Alice', $row['name']);
     }
 
-    public function testSoleThrowsWhenMultipleRowsMatch(): void
+    #[Test]
+    public function soleThrowsWhenMultipleRowsMatch(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -77,7 +85,8 @@ final class QueryBuilderTest extends MySqlTestCase
         $this->db->table('users')->where('active', 1)->sole();
     }
 
-    public function testFindById(): void
+    #[Test]
+    public function findById(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -88,7 +97,8 @@ final class QueryBuilderTest extends MySqlTestCase
         self::assertSame('Alice', $row['name']);
     }
 
-    public function testValueReturnsSingleColumnValue(): void
+    #[Test]
+    public function valueReturnsSingleColumnValue(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -98,7 +108,8 @@ final class QueryBuilderTest extends MySqlTestCase
         self::assertSame('alice@example.com', $email);
     }
 
-    public function testPluckReturnsArrayOfValues(): void
+    #[Test]
+    public function pluckReturnsArrayOfValues(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -108,7 +119,8 @@ final class QueryBuilderTest extends MySqlTestCase
         self::assertSame(['Alice', 'Bob', 'Charlie', 'Diana', 'Eve'], $names);
     }
 
-    public function testPluckWithKeyColumn(): void
+    #[Test]
+    public function pluckWithKeyColumn(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -123,7 +135,8 @@ final class QueryBuilderTest extends MySqlTestCase
     //  EXISTS
     // ---------------------------------------------------------------
 
-    public function testExistsReturnsTrueWhenMatchesFound(): void
+    #[Test]
+    public function existsReturnsTrueWhenMatchesFound(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -131,14 +144,16 @@ final class QueryBuilderTest extends MySqlTestCase
         self::assertTrue($this->db->table('users')->where('name', 'Alice')->exists());
     }
 
-    public function testExistsReturnsFalseWhenNoMatches(): void
+    #[Test]
+    public function existsReturnsFalseWhenNoMatches(): void
     {
         $this->createUsersTable();
 
         self::assertFalse($this->db->table('users')->where('name', 'Nobody')->exists());
     }
 
-    public function testDoesntExist(): void
+    #[Test]
+    public function doesntExist(): void
     {
         $this->createUsersTable();
 
@@ -149,7 +164,8 @@ final class QueryBuilderTest extends MySqlTestCase
     //  SELECT specific columns / distinct
     // ---------------------------------------------------------------
 
-    public function testSelectSpecificColumns(): void
+    #[Test]
+    public function selectSpecificColumns(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -162,7 +178,8 @@ final class QueryBuilderTest extends MySqlTestCase
         self::assertArrayNotHasKey('age', $row);
     }
 
-    public function testDistinct(): void
+    #[Test]
+    public function distinct(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -176,7 +193,8 @@ final class QueryBuilderTest extends MySqlTestCase
     //  WHERE clauses
     // ---------------------------------------------------------------
 
-    public function testWhereEquals(): void
+    #[Test]
+    public function whereEquals(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -186,7 +204,8 @@ final class QueryBuilderTest extends MySqlTestCase
         self::assertSame(1, $result->count());
     }
 
-    public function testWhereGreaterThan(): void
+    #[Test]
+    public function whereGreaterThan(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -197,7 +216,8 @@ final class QueryBuilderTest extends MySqlTestCase
         self::assertSame('Charlie', $result->first()['name'] ?? null);
     }
 
-    public function testWhereLessThan(): void
+    #[Test]
+    public function whereLessThan(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -208,7 +228,8 @@ final class QueryBuilderTest extends MySqlTestCase
         self::assertSame('Eve', $result->first()['name'] ?? null);
     }
 
-    public function testWhereGreaterThanOrEqual(): void
+    #[Test]
+    public function whereGreaterThanOrEqual(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -218,7 +239,8 @@ final class QueryBuilderTest extends MySqlTestCase
         self::assertSame(2, $result->count());
     }
 
-    public function testWhereLessThanOrEqual(): void
+    #[Test]
+    public function whereLessThanOrEqual(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -228,7 +250,8 @@ final class QueryBuilderTest extends MySqlTestCase
         self::assertSame(2, $result->count());
     }
 
-    public function testWhereNotEqual(): void
+    #[Test]
+    public function whereNotEqual(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -238,7 +261,8 @@ final class QueryBuilderTest extends MySqlTestCase
         self::assertSame(4, $result->count());
     }
 
-    public function testWhereNotEqualBang(): void
+    #[Test]
+    public function whereNotEqualBang(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -248,7 +272,8 @@ final class QueryBuilderTest extends MySqlTestCase
         self::assertSame(4, $result->count());
     }
 
-    public function testWhereLike(): void
+    #[Test]
+    public function whereLike(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -259,7 +284,8 @@ final class QueryBuilderTest extends MySqlTestCase
         self::assertSame('Alice', $result->first()['name'] ?? null);
     }
 
-    public function testOrWhere(): void
+    #[Test]
+    public function orWhere(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -272,7 +298,8 @@ final class QueryBuilderTest extends MySqlTestCase
         self::assertSame(2, $result->count());
     }
 
-    public function testWhereIn(): void
+    #[Test]
+    public function whereIn(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -282,7 +309,8 @@ final class QueryBuilderTest extends MySqlTestCase
         self::assertSame(3, $result->count());
     }
 
-    public function testWhereNotIn(): void
+    #[Test]
+    public function whereNotIn(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -292,7 +320,8 @@ final class QueryBuilderTest extends MySqlTestCase
         self::assertSame(3, $result->count());
     }
 
-    public function testWhereBetween(): void
+    #[Test]
+    public function whereBetween(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -302,7 +331,8 @@ final class QueryBuilderTest extends MySqlTestCase
         self::assertSame(3, $result->count());
     }
 
-    public function testWhereNotBetween(): void
+    #[Test]
+    public function whereNotBetween(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -312,7 +342,8 @@ final class QueryBuilderTest extends MySqlTestCase
         self::assertSame(2, $result->count());
     }
 
-    public function testWhereNull(): void
+    #[Test]
+    public function whereNull(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -322,7 +353,8 @@ final class QueryBuilderTest extends MySqlTestCase
         self::assertSame(5, $result->count());
     }
 
-    public function testWhereNotNull(): void
+    #[Test]
+    public function whereNotNull(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -332,7 +364,8 @@ final class QueryBuilderTest extends MySqlTestCase
         self::assertSame(5, $result->count());
     }
 
-    public function testWhereColumn(): void
+    #[Test]
+    public function whereColumn(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -342,7 +375,8 @@ final class QueryBuilderTest extends MySqlTestCase
         self::assertGreaterThanOrEqual(0, $result->count());
     }
 
-    public function testWhereDate(): void
+    #[Test]
+    public function whereDate(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -353,7 +387,8 @@ final class QueryBuilderTest extends MySqlTestCase
         self::assertSame(5, $result->count());
     }
 
-    public function testWhereYear(): void
+    #[Test]
+    public function whereYear(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -364,7 +399,8 @@ final class QueryBuilderTest extends MySqlTestCase
         self::assertSame(5, $result->count());
     }
 
-    public function testWhereMonth(): void
+    #[Test]
+    public function whereMonth(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -375,7 +411,8 @@ final class QueryBuilderTest extends MySqlTestCase
         self::assertSame(5, $result->count());
     }
 
-    public function testNestedWhereWithClosure(): void
+    #[Test]
+    public function nestedWhereWithClosure(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -391,7 +428,8 @@ final class QueryBuilderTest extends MySqlTestCase
         self::assertSame(2, $result->count());
     }
 
-    public function testMultipleChainedWheres(): void
+    #[Test]
+    public function multipleChainedWheres(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -408,7 +446,8 @@ final class QueryBuilderTest extends MySqlTestCase
     //  ORDER BY / LIMIT / OFFSET
     // ---------------------------------------------------------------
 
-    public function testOrderBy(): void
+    #[Test]
+    public function orderBy(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -418,7 +457,8 @@ final class QueryBuilderTest extends MySqlTestCase
         self::assertSame('Eve', $result->first()['name'] ?? null);
     }
 
-    public function testOrderByDesc(): void
+    #[Test]
+    public function orderByDesc(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -428,7 +468,8 @@ final class QueryBuilderTest extends MySqlTestCase
         self::assertSame('Charlie', $result->first()['name'] ?? null);
     }
 
-    public function testLimitAndOffset(): void
+    #[Test]
+    public function limitAndOffset(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -443,7 +484,8 @@ final class QueryBuilderTest extends MySqlTestCase
     //  GROUP BY / HAVING
     // ---------------------------------------------------------------
 
-    public function testGroupByWithHaving(): void
+    #[Test]
+    public function groupByWithHaving(): void
     {
         $this->createUsersTable();
         $this->createPostsTable();
@@ -463,7 +505,8 @@ final class QueryBuilderTest extends MySqlTestCase
     //  AGGREGATES
     // ---------------------------------------------------------------
 
-    public function testCount(): void
+    #[Test]
+    public function countsMatchingRows(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -471,7 +514,8 @@ final class QueryBuilderTest extends MySqlTestCase
         self::assertSame(5, $this->db->table('users')->count());
     }
 
-    public function testSum(): void
+    #[Test]
+    public function sum(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -479,7 +523,8 @@ final class QueryBuilderTest extends MySqlTestCase
         self::assertSame(850.5, $this->db->table('users')->sum('balance'));
     }
 
-    public function testAvg(): void
+    #[Test]
+    public function avg(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -489,7 +534,8 @@ final class QueryBuilderTest extends MySqlTestCase
         self::assertEqualsWithDelta(28.0, $avg, 0.01);
     }
 
-    public function testMin(): void
+    #[Test]
+    public function min(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -499,7 +545,8 @@ final class QueryBuilderTest extends MySqlTestCase
         self::assertEquals(22, $min);
     }
 
-    public function testMax(): void
+    #[Test]
+    public function max(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -513,7 +560,8 @@ final class QueryBuilderTest extends MySqlTestCase
     //  JOIN
     // ---------------------------------------------------------------
 
-    public function testInnerJoinWithCorrectResults(): void
+    #[Test]
+    public function innerJoinWithCorrectResults(): void
     {
         $this->createUsersTable();
         $this->createPostsTable();
@@ -528,7 +576,8 @@ final class QueryBuilderTest extends MySqlTestCase
         self::assertSame(4, $result->count());
     }
 
-    public function testLeftJoinIncludesNullMatches(): void
+    #[Test]
+    public function leftJoinIncludesNullMatches(): void
     {
         $this->createUsersTable();
         $this->createPostsTable();
@@ -545,7 +594,8 @@ final class QueryBuilderTest extends MySqlTestCase
         self::assertSame(6, $result->count());
     }
 
-    public function testSelectFromJoinedTables(): void
+    #[Test]
+    public function selectFromJoinedTables(): void
     {
         $this->createUsersTable();
         $this->createPostsTable();
@@ -567,7 +617,8 @@ final class QueryBuilderTest extends MySqlTestCase
     //  INSERT
     // ---------------------------------------------------------------
 
-    public function testInsertSingleRowAndVerifyWithSelect(): void
+    #[Test]
+    public function insertSingleRowAndVerifyWithSelect(): void
     {
         $this->createUsersTable();
 
@@ -583,7 +634,8 @@ final class QueryBuilderTest extends MySqlTestCase
         self::assertSame('Test', $row['name']);
     }
 
-    public function testInsertGetIdReturnsAutoIncrementId(): void
+    #[Test]
+    public function insertGetIdReturnsAutoIncrementId(): void
     {
         $this->createUsersTable();
 
@@ -602,7 +654,8 @@ final class QueryBuilderTest extends MySqlTestCase
         self::assertSame(2, $id2);
     }
 
-    public function testInsertBatchMultipleRows(): void
+    #[Test]
+    public function insertBatchMultipleRows(): void
     {
         $this->createUsersTable();
 
@@ -615,7 +668,8 @@ final class QueryBuilderTest extends MySqlTestCase
         self::assertSame(3, $this->db->table('users')->count());
     }
 
-    public function testInsertOrIgnoreSkipsDuplicates(): void
+    #[Test]
+    public function insertOrIgnoreSkipsDuplicates(): void
     {
         $this->createUsersTable();
 
@@ -637,7 +691,8 @@ final class QueryBuilderTest extends MySqlTestCase
     //  UPDATE
     // ---------------------------------------------------------------
 
-    public function testUpdateChangesData(): void
+    #[Test]
+    public function updateChangesData(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -650,7 +705,8 @@ final class QueryBuilderTest extends MySqlTestCase
         self::assertEquals(31, $row['age'] ?? null);
     }
 
-    public function testIncrement(): void
+    #[Test]
+    public function increment(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -661,7 +717,8 @@ final class QueryBuilderTest extends MySqlTestCase
         self::assertEquals(35, $row['age'] ?? null);
     }
 
-    public function testDecrement(): void
+    #[Test]
+    public function decrement(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -672,7 +729,8 @@ final class QueryBuilderTest extends MySqlTestCase
         self::assertEquals(27, $row['age'] ?? null);
     }
 
-    public function testUpdateWithWhereCondition(): void
+    #[Test]
+    public function updateWithWhereCondition(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -687,7 +745,8 @@ final class QueryBuilderTest extends MySqlTestCase
     //  UPSERT
     // ---------------------------------------------------------------
 
-    public function testUpsertInsertsNewRow(): void
+    #[Test]
+    public function upsertInsertsNewRow(): void
     {
         $this->createUsersTable();
 
@@ -701,7 +760,8 @@ final class QueryBuilderTest extends MySqlTestCase
         self::assertSame('New', $this->db->table('users')->where('email', 'new@example.com')->value('name'));
     }
 
-    public function testUpsertUpdatesExistingRow(): void
+    #[Test]
+    public function upsertUpdatesExistingRow(): void
     {
         $this->createUsersTable();
         $this->db->table('users')->insert(['name' => 'Old', 'email' => 'upsert@example.com', 'age' => 20]);
@@ -720,7 +780,8 @@ final class QueryBuilderTest extends MySqlTestCase
     //  DELETE
     // ---------------------------------------------------------------
 
-    public function testDeleteWithWhereRemovesSpecificRows(): void
+    #[Test]
+    public function deleteWithWhereRemovesSpecificRows(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -731,7 +792,8 @@ final class QueryBuilderTest extends MySqlTestCase
         self::assertSame(4, $this->db->table('users')->count());
     }
 
-    public function testDeleteWithoutWhereRemovesAll(): void
+    #[Test]
+    public function deleteWithoutWhereRemovesAll(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -742,7 +804,8 @@ final class QueryBuilderTest extends MySqlTestCase
         self::assertSame(0, $this->db->table('users')->count());
     }
 
-    public function testTruncateEmptiesTable(): void
+    #[Test]
+    public function truncateEmptiesTable(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -756,7 +819,8 @@ final class QueryBuilderTest extends MySqlTestCase
     //  CHUNKING
     // ---------------------------------------------------------------
 
-    public function testChunkProcessesAllRowsInBatches(): void
+    #[Test]
+    public function chunkProcessesAllRowsInBatches(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -771,7 +835,8 @@ final class QueryBuilderTest extends MySqlTestCase
         self::assertCount(5, $allNames);
     }
 
-    public function testChunkByIdProcessesCorrectly(): void
+    #[Test]
+    public function chunkByIdProcessesCorrectly(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -786,7 +851,8 @@ final class QueryBuilderTest extends MySqlTestCase
         self::assertCount(5, $allIds);
     }
 
-    public function testLazyYieldsAllRows(): void
+    #[Test]
+    public function lazyYieldsAllRows(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -799,7 +865,8 @@ final class QueryBuilderTest extends MySqlTestCase
         self::assertSame(5, $count);
     }
 
-    public function testChunkCallbackCanReturnFalseToStop(): void
+    #[Test]
+    public function chunkCallbackCanReturnFalseToStop(): void
     {
         $this->createUsersTable();
         $this->seedUsers();

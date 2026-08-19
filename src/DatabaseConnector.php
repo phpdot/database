@@ -38,7 +38,7 @@ final class DatabaseConnector implements ConnectorInterface
      */
     public function __construct(
         private readonly ConnectionConfig $config,
-        ?LoggerInterface $logger = null,
+        null|LoggerInterface $logger = null,
     ) {
         $this->logger = $logger ?? new NullLogger();
     }

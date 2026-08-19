@@ -50,7 +50,7 @@ interface ConnectionConfig
      *
      * @return Params|null
      */
-    public function readReplicaParams(): ?array;
+    public function readReplicaParams(): null|array;
 
     /**
      * The driver-agnostic behaviour (prefix, replicas, sticky, retries).

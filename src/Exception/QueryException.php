@@ -35,7 +35,7 @@ final class QueryException extends DatabaseException
         string $sql,
         array $bindings,
         string $message,
-        ?Throwable $previous = null,
+        null|Throwable $previous = null,
     ) {
         $this->sql = $sql;
         $this->bindings = $bindings;
@@ -73,7 +73,7 @@ final class QueryException extends DatabaseException
      *
      * @return QueryException
      */
-    public static function executionFailed(string $sql, array $bindings, string $error, ?Throwable $previous = null): self
+    public static function executionFailed(string $sql, array $bindings, string $error, null|Throwable $previous = null): self
     {
         return new self(
             $sql,

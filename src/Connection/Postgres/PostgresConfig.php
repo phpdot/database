@@ -17,6 +17,7 @@ use Doctrine\DBAL\DriverManager;
 use PHPdot\Database\Connection\ConfigValue;
 use PHPdot\Database\Connection\ConnectionConfig;
 use PHPdot\Database\Connection\ConnectionOptions;
+use SensitiveParameter;
 
 /**
  * @phpstan-import-type Params from DriverManager
@@ -45,6 +46,7 @@ final readonly class PostgresConfig implements ConnectionConfig
         public string $host = '127.0.0.1',
         public int $port = 5432,
         public string $username = 'postgres',
+        #[SensitiveParameter]
         public string $password = '',
         public string $charset = 'utf8',
         public string $gssencmode = '',
@@ -102,7 +104,7 @@ final readonly class PostgresConfig implements ConnectionConfig
     /**
      * @return Params|null
      */
-    public function readReplicaParams(): ?array
+    public function readReplicaParams(): null|array
     {
         if ($this->options->read === []) {
             return null;

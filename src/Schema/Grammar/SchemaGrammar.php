@@ -286,7 +286,7 @@ abstract class SchemaGrammar
      *
      * @return string
      */
-    protected function compileCreateIndexStatement(string $type, ?string $name, string $table, array $columns, ?IndexDefinition $index = null): string
+    protected function compileCreateIndexStatement(string $type, null|string $name, string $table, array $columns, null|IndexDefinition $index = null): string
     {
         $indexName = $name ?? $this->generateIndexName($table, $columns, $type);
         $wrappedColumns = implode(', ', array_map(fn(string $c): string => $this->wrapColumn($c), $columns));

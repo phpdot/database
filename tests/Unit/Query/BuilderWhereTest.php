@@ -253,6 +253,31 @@ final class BuilderWhereTest extends TestCase
     }
 
     #[Test]
+    public function orWhereLike(): void
+    {
+        $sql = $this->builder()->whereLike('name', '%john%')->orWhereLike('email', '%john%')->toSql();
+
+        self::assertSame('SELECT * FROM `users` WHERE `name` LIKE ? OR `email` LIKE ?', $sql);
+    }
+
+    #[Test]
+    public function orWhereLikeGroupedDoesNotLeakIntoSiblingClauses(): void
+    {
+        // One term across several columns is an OR, and it has to stay parenthesised:
+        // flattened, the ORs swallow the clause beside them and the `active` filter
+        // silently stops applying.
+        $sql = $this->builder()
+            ->where(static function (Builder $group): void {
+                $group->orWhereLike('name', '%john%')
+                    ->orWhereLike('email', '%john%');
+            })
+            ->where('active', 1)
+            ->toSql();
+
+        self::assertSame('SELECT * FROM `users` WHERE (`name` LIKE ? OR `email` LIKE ?) AND `active` = ?', $sql);
+    }
+
+    #[Test]
     public function whereNotLike(): void
     {
         $sql = $this->builder()->whereNotLike('name', '%admin%')->toSql();

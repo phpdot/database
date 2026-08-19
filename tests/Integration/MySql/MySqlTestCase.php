@@ -27,7 +27,7 @@ abstract class MySqlTestCase extends TestCase
         try {
             $this->db->select('SELECT 1');
         } catch (\Throwable $e) {
-            $this->markTestSkipped('MySQL is not available: ' . $e->getMessage());
+            self::skipOrFail('MySQL is not available: ' . $e->getMessage());
         }
 
         $this->cleanDatabase();
@@ -109,5 +109,27 @@ abstract class MySqlTestCase extends TestCase
             ['user_id' => 2, 'title' => 'Bob Post', 'body' => 'Bob writes', 'published' => 0, 'views' => 10],
             ['user_id' => 3, 'title' => 'Draft', 'body' => 'Work in progress', 'published' => 0, 'views' => 0],
         ]);
+    }
+
+    /**
+     * Skip when the database is absent — unless DB_TESTS_REQUIRED=1, when the
+     * absence is a FAILURE.
+     *
+     * A silent skip is how a suite reports green while the tests that matter
+     * never ran: this package's integration coverage sat skipped, unnoticed,
+     * because nothing distinguished "passed" from "not attempted". Local runs
+     * without docker stay convenient; CI sets the flag and cannot lie.
+     *
+     * @param string $reason Why the database could not be reached
+     *
+     * @return never
+     */
+    protected function skipOrFail(string $reason): never
+    {
+        if (getenv('DB_TESTS_REQUIRED') === '1') {
+            self::fail($reason . ' (DB_TESTS_REQUIRED=1 — integration coverage may not be skipped)');
+        }
+
+        self::markTestSkipped($reason);
     }
 }

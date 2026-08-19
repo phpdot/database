@@ -5,12 +5,15 @@ declare(strict_types=1);
 namespace PHPdot\Database\Tests\Integration\MySql;
 
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\Test;
 use RuntimeException;
 
 #[Group('mysql')]
+#[Group('integration')]
 final class TransactionTest extends MySqlTestCase
 {
-    public function testTransactionCommitsOnSuccess(): void
+    #[Test]
+    public function transactionCommitsOnSuccess(): void
     {
         $this->createUsersTable();
 
@@ -21,7 +24,8 @@ final class TransactionTest extends MySqlTestCase
         self::assertSame(1, $this->db->table('users')->count());
     }
 
-    public function testTransactionRollsBackOnException(): void
+    #[Test]
+    public function transactionRollsBackOnException(): void
     {
         $this->createUsersTable();
 
@@ -37,7 +41,8 @@ final class TransactionTest extends MySqlTestCase
         self::assertSame(0, $this->db->table('users')->count());
     }
 
-    public function testNestedTransactionsWithSavepoints(): void
+    #[Test]
+    public function nestedTransactionsWithSavepoints(): void
     {
         $this->createUsersTable();
 
@@ -59,7 +64,8 @@ final class TransactionTest extends MySqlTestCase
         self::assertTrue($this->db->table('users')->where('email', 'outer@example.com')->exists());
     }
 
-    public function testTransactionLevelTracking(): void
+    #[Test]
+    public function transactionLevelTracking(): void
     {
         self::assertSame(0, $this->db->transactionLevel());
 
@@ -70,7 +76,8 @@ final class TransactionTest extends MySqlTestCase
         self::assertSame(0, $this->db->transactionLevel());
     }
 
-    public function testManualBeginCommit(): void
+    #[Test]
+    public function manualBeginCommit(): void
     {
         $this->createUsersTable();
 
@@ -81,7 +88,8 @@ final class TransactionTest extends MySqlTestCase
         self::assertSame(1, $this->db->table('users')->count());
     }
 
-    public function testManualBeginRollBack(): void
+    #[Test]
+    public function manualBeginRollBack(): void
     {
         $this->createUsersTable();
 

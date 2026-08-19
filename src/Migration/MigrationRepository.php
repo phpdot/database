@@ -238,7 +238,7 @@ final class MigrationRepository
      *
      * @return int|null The batch number, or null if the migration has not been run
      */
-    public function getBatch(string $migration): ?int
+    public function getBatch(string $migration): null|int
     {
         $quote = $this->getQuoteChar();
         $result = $this->connection->selectOne(

@@ -116,7 +116,7 @@ final class SqliteGrammar extends Grammar
      * @param int|null $offset The number of rows to skip
      * @param int|null $limit The active LIMIT, if any
      */
-    protected function compileOffset(?int $offset, ?int $limit = null): string
+    protected function compileOffset(null|int $offset, null|int $limit = null): string
     {
         if ($offset === null) {
             return '';

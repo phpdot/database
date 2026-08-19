@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace PHPdot\Database\Tests\Integration\Sqlite;
 
+use PHPUnit\Framework\Attributes\Test;
 use RuntimeException;
 
 final class TransactionTest extends SqliteTestCase
 {
-    public function testCommitPersistsData(): void
+    #[Test]
+    public function commitPersistsData(): void
     {
         $this->db->transaction(function ($db): void {
             $db->table('users')->insert(['name' => 'TxUser', 'email' => 'tx@example.com']);
@@ -17,7 +19,8 @@ final class TransactionTest extends SqliteTestCase
         self::assertSame(1, $this->db->table('users')->count());
     }
 
-    public function testRollbackDiscardsData(): void
+    #[Test]
+    public function rollbackDiscardsData(): void
     {
         try {
             $this->db->transaction(function ($db): void {
@@ -30,7 +33,8 @@ final class TransactionTest extends SqliteTestCase
         self::assertSame(0, $this->db->table('users')->count());
     }
 
-    public function testNestedWithSavepoints(): void
+    #[Test]
+    public function nestedWithSavepoints(): void
     {
         $this->db->transaction(function ($db): void {
             $db->table('users')->insert(['name' => 'Outer', 'email' => 'outer@example.com']);
@@ -47,7 +51,8 @@ final class TransactionTest extends SqliteTestCase
         self::assertTrue($this->db->table('users')->where('email', 'outer@example.com')->exists());
     }
 
-    public function testTransactionLevelTracking(): void
+    #[Test]
+    public function transactionLevelTracking(): void
     {
         self::assertSame(0, $this->db->transactionLevel());
 

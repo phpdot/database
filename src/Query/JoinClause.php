@@ -29,7 +29,7 @@ final class JoinClause
     public array $bindings = [];
 
     /** Raw subquery SQL when this join targets a derived table (set by joinSub). */
-    public ?string $subQuery = null;
+    public null|string $subQuery = null;
 
     /** Alias for the derived table when $subQuery is set. */
     public string $alias = '';

@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace PHPdot\Database\Tests\Integration\Sqlite;
 
 use PHPdot\Database\Result\TypeCaster;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 final class TypeCasterTest extends TestCase
 {
-    public function testCastInt(): void
+    #[Test]
+    public function castInt(): void
     {
         $caster = new TypeCaster(['age' => 'int']);
 
@@ -18,7 +20,8 @@ final class TypeCasterTest extends TestCase
         self::assertSame(25, $result['age']);
     }
 
-    public function testCastFloat(): void
+    #[Test]
+    public function castFloat(): void
     {
         $caster = new TypeCaster(['balance' => 'float']);
 
@@ -27,7 +30,8 @@ final class TypeCasterTest extends TestCase
         self::assertSame(100.50, $result['balance']);
     }
 
-    public function testCastBool(): void
+    #[Test]
+    public function castBool(): void
     {
         $caster = new TypeCaster(['active' => 'bool']);
 
@@ -40,7 +44,8 @@ final class TypeCasterTest extends TestCase
         self::assertFalse($result['active']);
     }
 
-    public function testCastString(): void
+    #[Test]
+    public function castString(): void
     {
         $caster = new TypeCaster(['id' => 'string']);
 
@@ -49,7 +54,8 @@ final class TypeCasterTest extends TestCase
         self::assertSame('42', $result['id']);
     }
 
-    public function testCastJson(): void
+    #[Test]
+    public function castJson(): void
     {
         $caster = new TypeCaster(['data' => 'json']);
 
@@ -58,7 +64,8 @@ final class TypeCasterTest extends TestCase
         self::assertSame(['key' => 'value'], $result['data']);
     }
 
-    public function testCastDatetime(): void
+    #[Test]
+    public function castDatetime(): void
     {
         $caster = new TypeCaster(['created_at' => 'datetime']);
 

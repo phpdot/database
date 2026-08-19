@@ -667,7 +667,7 @@ final class Blueprint
      *
      * @return IndexDefinition
      */
-    public function primary(string|array $columns, ?string $name = null): IndexDefinition
+    public function primary(string|array $columns, null|string $name = null): IndexDefinition
     {
         return $this->addIndex('primary', $columns, $name);
     }
@@ -680,7 +680,7 @@ final class Blueprint
      *
      * @return IndexDefinition
      */
-    public function unique(string|array $columns, ?string $name = null): IndexDefinition
+    public function unique(string|array $columns, null|string $name = null): IndexDefinition
     {
         return $this->addIndex('unique', $columns, $name);
     }
@@ -693,7 +693,7 @@ final class Blueprint
      *
      * @return IndexDefinition
      */
-    public function index(string|array $columns, ?string $name = null): IndexDefinition
+    public function index(string|array $columns, null|string $name = null): IndexDefinition
     {
         return $this->addIndex('index', $columns, $name);
     }
@@ -706,7 +706,7 @@ final class Blueprint
      *
      * @return IndexDefinition
      */
-    public function fullText(string|array $columns, ?string $name = null): IndexDefinition
+    public function fullText(string|array $columns, null|string $name = null): IndexDefinition
     {
         return $this->addIndex('fulltext', $columns, $name);
     }
@@ -719,7 +719,7 @@ final class Blueprint
      *
      * @return IndexDefinition
      */
-    public function spatialIndex(string|array $columns, ?string $name = null): IndexDefinition
+    public function spatialIndex(string|array $columns, null|string $name = null): IndexDefinition
     {
         return $this->addIndex('spatial', $columns, $name);
     }
@@ -1029,7 +1029,7 @@ final class Blueprint
      *
      * @return IndexDefinition
      */
-    private function addIndex(string $type, string|array $columns, ?string $name = null): IndexDefinition
+    private function addIndex(string $type, string|array $columns, null|string $name = null): IndexDefinition
     {
         $index = new IndexDefinition($type, $columns, $name);
         $this->indexes[] = $index;

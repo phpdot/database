@@ -6,11 +6,14 @@ namespace PHPdot\Database\Tests\Integration\MySql;
 
 use PHPdot\Database\Schema\Blueprint;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\Test;
 
 #[Group('mysql')]
+#[Group('integration')]
 final class SchemaBuilderTest extends MySqlTestCase
 {
-    public function testCreateTableWithVariousColumnTypes(): void
+    #[Test]
+    public function createTableWithVariousColumnTypes(): void
     {
         $schema = $this->db->schema();
 
@@ -34,19 +37,22 @@ final class SchemaBuilderTest extends MySqlTestCase
         self::assertTrue($schema->hasTable('test_types'));
     }
 
-    public function testHasTableReturnsTrueForExistingTable(): void
+    #[Test]
+    public function hasTableReturnsTrueForExistingTable(): void
     {
         $this->createUsersTable();
 
         self::assertTrue($this->db->schema()->hasTable('users'));
     }
 
-    public function testHasTableReturnsFalseForNonExisting(): void
+    #[Test]
+    public function hasTableReturnsFalseForNonExisting(): void
     {
         self::assertFalse($this->db->schema()->hasTable('nonexistent_table'));
     }
 
-    public function testHasColumnChecksColumnExistence(): void
+    #[Test]
+    public function hasColumnChecksColumnExistence(): void
     {
         $this->createUsersTable();
 
@@ -56,7 +62,8 @@ final class SchemaBuilderTest extends MySqlTestCase
         self::assertFalse($schema->hasColumn('users', 'nonexistent'));
     }
 
-    public function testGetColumnListingReturnsColumnNames(): void
+    #[Test]
+    public function getColumnListingReturnsColumnNames(): void
     {
         $this->createUsersTable();
 
@@ -68,7 +75,8 @@ final class SchemaBuilderTest extends MySqlTestCase
         self::assertContains('age', $columns);
     }
 
-    public function testDropTable(): void
+    #[Test]
+    public function dropTable(): void
     {
         $this->createUsersTable();
         $schema = $this->db->schema();
@@ -80,7 +88,8 @@ final class SchemaBuilderTest extends MySqlTestCase
         self::assertFalse($schema->hasTable('users'));
     }
 
-    public function testDropIfExistsOnNonExistingTableDoesNotError(): void
+    #[Test]
+    public function dropIfExistsOnNonExistingTableDoesNotError(): void
     {
         $schema = $this->db->schema();
 
@@ -90,7 +99,8 @@ final class SchemaBuilderTest extends MySqlTestCase
         self::assertFalse($schema->hasTable('totally_nonexistent_table'));
     }
 
-    public function testRenameTable(): void
+    #[Test]
+    public function renameTable(): void
     {
         $this->createUsersTable();
         $schema = $this->db->schema();
@@ -101,7 +111,8 @@ final class SchemaBuilderTest extends MySqlTestCase
         self::assertTrue($schema->hasTable('members'));
     }
 
-    public function testAlterTableAddColumn(): void
+    #[Test]
+    public function alterTableAddColumn(): void
     {
         $this->createUsersTable();
         $schema = $this->db->schema();
@@ -113,7 +124,8 @@ final class SchemaBuilderTest extends MySqlTestCase
         self::assertTrue($schema->hasColumn('users', 'nickname'));
     }
 
-    public function testAlterTableDropColumn(): void
+    #[Test]
+    public function alterTableDropColumn(): void
     {
         $this->createUsersTable();
         $schema = $this->db->schema();
@@ -125,7 +137,8 @@ final class SchemaBuilderTest extends MySqlTestCase
         self::assertFalse($schema->hasColumn('users', 'deleted_at'));
     }
 
-    public function testCreateIndex(): void
+    #[Test]
+    public function createIndex(): void
     {
         $schema = $this->db->schema();
 
@@ -141,7 +154,8 @@ final class SchemaBuilderTest extends MySqlTestCase
         self::assertGreaterThanOrEqual(1, $indexes->count());
     }
 
-    public function testCreateUniqueIndex(): void
+    #[Test]
+    public function createUniqueIndex(): void
     {
         $schema = $this->db->schema();
 
@@ -156,7 +170,8 @@ final class SchemaBuilderTest extends MySqlTestCase
         self::assertGreaterThanOrEqual(1, $indexes->count());
     }
 
-    public function testCreateForeignKey(): void
+    #[Test]
+    public function createForeignKey(): void
     {
         $this->createUsersTable();
         $schema = $this->db->schema();
@@ -181,7 +196,8 @@ final class SchemaBuilderTest extends MySqlTestCase
         self::assertFalse($inserted, 'Foreign key constraint should prevent insert with invalid user_id');
     }
 
-    public function testTimestampsAndSoftDeletes(): void
+    #[Test]
+    public function timestampsAndSoftDeletes(): void
     {
         $schema = $this->db->schema();
 

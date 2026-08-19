@@ -17,6 +17,7 @@ use Doctrine\DBAL\DriverManager;
 use PHPdot\Database\Connection\ConfigValue;
 use PHPdot\Database\Connection\ConnectionConfig;
 use PHPdot\Database\Connection\ConnectionOptions;
+use SensitiveParameter;
 
 /**
  * @phpstan-import-type Params from DriverManager
@@ -40,6 +41,7 @@ final readonly class MySqlConfig implements ConnectionConfig
         public string $host = '127.0.0.1',
         public int $port = 3306,
         public string $username = 'root',
+        #[SensitiveParameter]
         public string $password = '',
         public string $charset = 'utf8mb4',
         public array $driverOptions = [],
@@ -95,7 +97,7 @@ final readonly class MySqlConfig implements ConnectionConfig
     /**
      * @return Params|null
      */
-    public function readReplicaParams(): ?array
+    public function readReplicaParams(): null|array
     {
         if ($this->options->read === []) {
             return null;

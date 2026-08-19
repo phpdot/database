@@ -6,10 +6,12 @@ namespace PHPdot\Database\Tests\Integration\Sqlite;
 
 use PHPdot\Database\Exception\QueryException;
 use PHPdot\Database\Schema\Blueprint;
+use PHPUnit\Framework\Attributes\Test;
 
 final class SchemaBuilderTest extends SqliteTestCase
 {
-    public function testStoredGeneratedColumnOnSqlite(): void
+    #[Test]
+    public function storedGeneratedColumnOnSqlite(): void
     {
         $schema = $this->db->schema();
         $schema->create('boxes', function (Blueprint $table): void {
@@ -29,7 +31,8 @@ final class SchemaBuilderTest extends SqliteTestCase
         self::assertContains('area', $this->db->schema()->getColumnListing('boxes'));
     }
 
-    public function testForeignKeysAreEnforcedOnSqlite(): void
+    #[Test]
+    public function foreignKeysAreEnforcedOnSqlite(): void
     {
         $schema = $this->db->schema();
         $schema->create('mv_parents', function (Blueprint $table): void {
@@ -52,7 +55,8 @@ final class SchemaBuilderTest extends SqliteTestCase
         $this->db->table('mv_children')->insert(['parent_id' => 999999]);
     }
 
-    public function testEnumValuesAreEnforcedOnSqlite(): void
+    #[Test]
+    public function enumValuesAreEnforcedOnSqlite(): void
     {
         $schema = $this->db->schema();
         $schema->create('tickets', function (Blueprint $table): void {
@@ -66,7 +70,8 @@ final class SchemaBuilderTest extends SqliteTestCase
         $this->db->table('tickets')->insert(['status' => 'invalid']);
     }
 
-    public function testColumnLevelUniqueIsEnforcedOnSqlite(): void
+    #[Test]
+    public function columnLevelUniqueIsEnforcedOnSqlite(): void
     {
         $schema = $this->db->schema();
         $schema->create('widgets', function (Blueprint $table): void {
@@ -80,7 +85,8 @@ final class SchemaBuilderTest extends SqliteTestCase
         $this->db->table('widgets')->insert(['code' => 'A']);
     }
 
-    public function testTableLevelUniqueIsEnforcedOnSqlite(): void
+    #[Test]
+    public function tableLevelUniqueIsEnforcedOnSqlite(): void
     {
         $schema = $this->db->schema();
         $schema->create('gadgets', function (Blueprint $table): void {
@@ -95,7 +101,8 @@ final class SchemaBuilderTest extends SqliteTestCase
         $this->db->table('gadgets')->insert(['sku' => 'X']);
     }
 
-    public function testAlterCreatesIndexAndDropsColumnOnSqlite(): void
+    #[Test]
+    public function alterCreatesIndexAndDropsColumnOnSqlite(): void
     {
         $schema = $this->db->schema();
         $schema->create('items', function (Blueprint $table): void {
@@ -118,7 +125,8 @@ final class SchemaBuilderTest extends SqliteTestCase
         $this->db->table('items')->insert(['label' => 'one']);
     }
 
-    public function testCreateTableWithVariousTypes(): void
+    #[Test]
+    public function createTableWithVariousTypes(): void
     {
         $schema = $this->db->schema();
 
@@ -141,17 +149,20 @@ final class SchemaBuilderTest extends SqliteTestCase
         self::assertTrue($schema->hasTable('test_types'));
     }
 
-    public function testHasTableReturnsTrue(): void
+    #[Test]
+    public function hasTableReturnsTrue(): void
     {
         self::assertTrue($this->db->schema()->hasTable('users'));
     }
 
-    public function testHasTableReturnsFalse(): void
+    #[Test]
+    public function hasTableReturnsFalse(): void
     {
         self::assertFalse($this->db->schema()->hasTable('nonexistent_table'));
     }
 
-    public function testHasColumnReturnsTrue(): void
+    #[Test]
+    public function hasColumnReturnsTrue(): void
     {
         $schema = $this->db->schema();
 
@@ -159,12 +170,14 @@ final class SchemaBuilderTest extends SqliteTestCase
         self::assertTrue($schema->hasColumn('users', 'email'));
     }
 
-    public function testHasColumnReturnsFalse(): void
+    #[Test]
+    public function hasColumnReturnsFalse(): void
     {
         self::assertFalse($this->db->schema()->hasColumn('users', 'nonexistent'));
     }
 
-    public function testGetColumnListing(): void
+    #[Test]
+    public function getColumnListing(): void
     {
         $columns = $this->db->schema()->getColumnListing('users');
 
@@ -174,7 +187,8 @@ final class SchemaBuilderTest extends SqliteTestCase
         self::assertContains('age', $columns);
     }
 
-    public function testDropTable(): void
+    #[Test]
+    public function dropTable(): void
     {
         $schema = $this->db->schema();
 
@@ -185,7 +199,8 @@ final class SchemaBuilderTest extends SqliteTestCase
         self::assertFalse($schema->hasTable('users'));
     }
 
-    public function testDropIfExistsNonExistingDoesNotError(): void
+    #[Test]
+    public function dropIfExistsNonExistingDoesNotError(): void
     {
         $schema = $this->db->schema();
 
@@ -194,7 +209,8 @@ final class SchemaBuilderTest extends SqliteTestCase
         self::assertFalse($schema->hasTable('totally_nonexistent_table'));
     }
 
-    public function testRenameTable(): void
+    #[Test]
+    public function renameTable(): void
     {
         $schema = $this->db->schema();
 
@@ -204,7 +220,8 @@ final class SchemaBuilderTest extends SqliteTestCase
         self::assertTrue($schema->hasTable('members'));
     }
 
-    public function testAlterTableAddColumn(): void
+    #[Test]
+    public function alterTableAddColumn(): void
     {
         $schema = $this->db->schema();
 
@@ -215,7 +232,8 @@ final class SchemaBuilderTest extends SqliteTestCase
         self::assertTrue($schema->hasColumn('users', 'nickname'));
     }
 
-    public function testTimestampsCreatesBothColumns(): void
+    #[Test]
+    public function timestampsCreatesBothColumns(): void
     {
         $schema = $this->db->schema();
 
@@ -230,7 +248,8 @@ final class SchemaBuilderTest extends SqliteTestCase
         self::assertContains('updated_at', $columns);
     }
 
-    public function testSoftDeletesCreatesDeletedAt(): void
+    #[Test]
+    public function softDeletesCreatesDeletedAt(): void
     {
         $schema = $this->db->schema();
 

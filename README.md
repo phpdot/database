@@ -184,8 +184,8 @@ composer check       # All three
 
 The unit suite and the SQLite integration suite (in-memory) run with no external services. The
 PostgreSQL and MySQL integration suites connect to a real server and **skip automatically when one is
-not reachable** — point them at a server via the `PG_*` environment variables (PostgreSQL) or a local
-MySQL on `localhost:3306` to run them.
+not reachable** — point them at a server via the `MYSQL_*` (MySQL) or `PG_*` (PostgreSQL)
+environment variables; the monorepo's compose stack defaults are baked into phpunit.xml.
 
 ## License
 

@@ -709,7 +709,7 @@ abstract class Grammar
      *
      * @return string
      */
-    protected function compileLimit(?int $limit): string
+    protected function compileLimit(null|int $limit): string
     {
         if ($limit === null) {
             return '';
@@ -726,7 +726,7 @@ abstract class Grammar
      *
      * @return string
      */
-    protected function compileOffset(?int $offset, ?int $limit = null): string
+    protected function compileOffset(null|int $offset, null|int $limit = null): string
     {
         if ($offset === null) {
             return '';

@@ -27,7 +27,7 @@ abstract class PostgreSqlTestCase extends TestCase
         try {
             $this->db->select('SELECT 1');
         } catch (\Throwable $e) {
-            $this->markTestSkipped('PostgreSQL is not available: ' . $e->getMessage());
+            self::skipOrFail('PostgreSQL is not available: ' . $e->getMessage());
         }
 
         $this->db->statement("SET TIME ZONE 'UTC'");
@@ -75,5 +75,27 @@ abstract class PostgreSqlTestCase extends TestCase
             ['name' => 'Diana', 'email' => 'diana@example.com', 'age' => 28, 'active' => 1, 'balance' => 0.00, 'tags' => '["user"]'],
             ['name' => 'Eve', 'email' => 'eve@example.com', 'age' => 22, 'active' => 1, 'balance' => 500.00, 'tags' => '["vip"]'],
         ]);
+    }
+
+    /**
+     * Skip when the database is absent — unless DB_TESTS_REQUIRED=1, when the
+     * absence is a FAILURE.
+     *
+     * A silent skip is how a suite reports green while the tests that matter
+     * never ran: this package's integration coverage sat skipped, unnoticed,
+     * because nothing distinguished "passed" from "not attempted". Local runs
+     * without docker stay convenient; CI sets the flag and cannot lie.
+     *
+     * @param string $reason Why the database could not be reached
+     *
+     * @return never
+     */
+    protected function skipOrFail(string $reason): never
+    {
+        if (getenv('DB_TESTS_REQUIRED') === '1') {
+            self::fail($reason . ' (DB_TESTS_REQUIRED=1 — integration coverage may not be skipped)');
+        }
+
+        self::markTestSkipped($reason);
     }
 }

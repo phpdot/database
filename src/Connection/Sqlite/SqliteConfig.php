@@ -86,7 +86,7 @@ final readonly class SqliteConfig implements ConnectionConfig
      *
      * @return Params|null
      */
-    public function readReplicaParams(): ?array
+    public function readReplicaParams(): null|array
     {
         return null;
     }

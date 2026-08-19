@@ -20,6 +20,7 @@ use Doctrine\DBAL\Driver\Exception as DbalDriverException;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Exception as DbalException;
 use Doctrine\DBAL\Exception\ConnectionException as DbalConnectionException;
+use Doctrine\DBAL\Exception\RetryableException as DbalRetryableException;
 use Doctrine\DBAL\ParameterType;
 use PDO;
 use PHPdot\Database\Connection\ConnectionConfig;
@@ -47,7 +48,7 @@ final class DatabaseConnection
 
     private bool $connected = false;
 
-    private ?DbalConnection $readDbal = null;
+    private null|DbalConnection $readDbal = null;
 
     private bool $readConnected = false;
 
@@ -83,7 +84,7 @@ final class DatabaseConnection
      */
     public function __construct(
         private readonly ConnectionConfig $config,
-        ?LoggerInterface $logger = null,
+        null|LoggerInterface $logger = null,
     ) {
         $this->logger = $logger ?? new NullLogger();
         $this->grammar = $this->createGrammar();
@@ -197,17 +198,41 @@ final class DatabaseConnection
      */
     public function reset(): void
     {
-        try {
-            while ($this->transactionLevel() > 0) {
-                $this->rollBack();
+        // Only when the socket is still there. Rolling back a connection already known lost would
+        // write into a dead socket — the transaction died with it — and that write is what surfaces
+        // as "Send of N bytes failed with errno=32 Broken pipe", a PHP diagnostic no catch can hold.
+        if ($this->connected) {
+            try {
+                while ($this->transactionLevel() > 0) {
+                    $this->rollBack();
+                }
+            } catch (Throwable) {
             }
-        } catch (Throwable) {
         }
 
         $this->recordsModified = false;
         $this->forceWriteForNextRead = false;
         $this->queryLogEnabled = false;
         $this->queryLog = [];
+    }
+
+    /**
+     * Record that the connection is gone, without touching the socket.
+     *
+     * Called on the paths where a lost connection is detected but deliberately
+     * NOT re-established — inside a transaction, where retrying would commit a
+     * partial write outside it. Without this the object goes on claiming to be
+     * connected: `ping()` writes `SELECT 1` into a dead socket (the broken-pipe
+     * notice), and a pool re-pools a corpse. Flipping the flag instead makes
+     * the connection tell the truth about itself — `ping()` answers false with
+     * no I/O, a pool discards it and refills, and the next use reconnects.
+     * `close()` is not used here: it would write to the same dead socket.
+     *
+     * @return void
+     */
+    private function markLost(): void
+    {
+        $this->connected = false;
     }
 
     /**
@@ -284,7 +309,7 @@ final class DatabaseConnection
      *
      * @return array<string, mixed>|null
      */
-    public function selectOne(string $sql, array $bindings = []): ?array
+    public function selectOne(string $sql, array $bindings = []): null|array
     {
         return $this->select($sql, $bindings)->first();
     }
@@ -951,6 +976,8 @@ final class DatabaseConnection
                 }
 
                 if ($inTransaction) {
+                    $this->markLost();
+
                     throw $e;
                 }
 
@@ -991,12 +1018,16 @@ final class DatabaseConnection
 
             return $result;
         } catch (DbalException $e) {
-            if ($this->isConnectionLost($e) && !$inTransaction) {
-                $this->reconnect();
-                $result = $callback($this->dbal);
-                $this->recordsModified = true;
+            if ($this->isConnectionLost($e)) {
+                if (!$inTransaction) {
+                    $this->reconnect();
+                    $result = $callback($this->dbal);
+                    $this->recordsModified = true;
 
-                return $result;
+                    return $result;
+                }
+
+                $this->markLost();
             }
 
             throw $e;
@@ -1034,14 +1065,40 @@ final class DatabaseConnection
     }
 
     /**
+     * Driver error codes that mean the connection is gone and that DBAL's own
+     * converters do NOT map to its ConnectionException hierarchy.
+     *
+     * Deliberately short: everything DBAL already classifies is caught by the
+     * typed check below and must not be duplicated here, or the two lists
+     * drift. MySQL 2006 (gone away) and 4031 (server closed an idle
+     * connection) are Doctrine's; 2013 is the notable omission — verified
+     * absent from its MySQL converter — and 2055 and 1053 are the same family.
+     *
+     * @var list<int>
+     */
+    private const array LOST_CONNECTION_CODES = [
+        2013, // MySQL: lost connection to server during query
+        2055, // MySQL: lost connection to server, system error
+        1053, // MySQL: server shutdown in progress
+    ];
+
+    /**
      * Determine if the given exception indicates a lost connection.
      *
-     * Detection is tiered from most to least reliable: DBAL's typed
-     * ConnectionException hierarchy first (the drivers' own error-code
-     * mapping), then the SQLSTATE connection-exception class (08xxx, plus
-     * 57P01 admin shutdown) from the driver exception chain, and finally a
-     * message-substring fallback for errors the driver converters leave
-     * generic (e.g. PostgreSQL's "server closed the connection unexpectedly").
+     * Three code-based tiers, no message parsing. Messages are localized,
+     * reworded between releases, and differ per driver, so matching on them is
+     * a guess that silently stops working; every tier here reads a value the
+     * driver assigns.
+     *
+     *   1. DBAL's typed ConnectionException hierarchy — which its converters
+     *      populate FROM driver codes (MySQL 2006 and 4031 become
+     *      ConnectionLost). This catches the common cases already.
+     *   2. SQLSTATE — the ANSI class-08 "connection exception" family, plus
+     *      PostgreSQL's 57P01 admin shutdown. A standardized code that happens
+     *      to be spelled with characters; its first two are the class. Note
+     *      MySQL reports HY000 for a lost connection, so this tier is really
+     *      PostgreSQL's and must not be relied on alone.
+     *   3. The driver codes DBAL misses, above.
      *
      * @param \Throwable $e The exception to inspect
      *
@@ -1054,26 +1111,22 @@ final class DatabaseConnection
         }
 
         for ($prev = $e; $prev !== null; $prev = $prev->getPrevious()) {
-            if ($prev instanceof DbalDriverException) {
-                $state = $prev->getSQLState();
+            if (!$prev instanceof DbalDriverException) {
+                continue;
+            }
 
-                if ($state !== null && (str_starts_with($state, '08') || $state === '57P01')) {
-                    return true;
-                }
+            $state = $prev->getSQLState();
+
+            if ($state !== null && (str_starts_with($state, '08') || $state === '57P01')) {
+                return true;
+            }
+
+            if (in_array($prev->getCode(), self::LOST_CONNECTION_CODES, true)) {
+                return true;
             }
         }
 
-        $message = strtolower($e->getMessage());
-
-        return str_contains($message, 'gone away')
-            || str_contains($message, 'lost connection')
-            || str_contains($message, 'broken pipe')
-            || str_contains($message, 'connection reset')
-            || str_contains($message, 'connection refused')
-            || str_contains($message, 'no connection')
-            || str_contains($message, 'server closed the connection')
-            || str_contains($message, 'terminating connection')
-            || str_contains($message, 'ssl connection has been closed');
+        return false;
     }
 
     /**
@@ -1130,16 +1183,40 @@ final class DatabaseConnection
     /**
      * Determine if the given exception was caused by a deadlock.
      *
+     * Code-based, no message parsing — the same standard isConnectionLost()
+     * documents: messages are localized, reworded between releases, and
+     * differ per driver. Walks the previous chain because query failures
+     * arrive wrapped in QueryException.
+     *
+     *   1. DBAL's RetryableException marker — its converters map MySQL 1213
+     *      and 1205, PostgreSQL 40001 and 40P01, and SQLite "database is
+     *      locked" to DeadlockException / LockWaitTimeoutException, both of
+     *      which a fresh attempt can win.
+     *   2. SQLSTATE — 40001 (serialization failure) and 40P01 (PostgreSQL
+     *      deadlock) for any driver exception DBAL leaves unclassified.
+     *
      * @param \Throwable $e
      *
      * @return bool
      */
     private function isDeadlock(Throwable $e): bool
     {
-        $message = $e->getMessage();
+        for ($prev = $e; $prev !== null; $prev = $prev->getPrevious()) {
+            if ($prev instanceof DbalRetryableException) {
+                return true;
+            }
 
-        return str_contains($message, '1213')
-            || str_contains($message, '40001')
-            || str_contains($message, 'deadlock');
+            if (!$prev instanceof DbalDriverException) {
+                continue;
+            }
+
+            $state = $prev->getSQLState();
+
+            if ($state === '40001' || $state === '40P01') {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

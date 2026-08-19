@@ -4,14 +4,17 @@ declare(strict_types=1);
 
 namespace PHPdot\Database\Tests\Integration\Sqlite;
 
+use PHPdot\Contracts\Pagination\CursorPaginator;
+use PHPdot\Contracts\Pagination\Paginator;
+use PHPdot\Database\Exception\InvalidCursorException;
 use PHPdot\Database\Query\Expression;
-use PHPdot\Database\Result\CursorPaginator;
-use PHPdot\Database\Result\Paginator;
 use PHPdot\Database\Result\ResultSet;
+use PHPUnit\Framework\Attributes\Test;
 
 final class QueryBuilderTest extends SqliteTestCase
 {
-    public function testGetReturnsCorrectData(): void
+    #[Test]
+    public function getReturnsCorrectData(): void
     {
         $this->seedUsers();
 
@@ -22,7 +25,8 @@ final class QueryBuilderTest extends SqliteTestCase
         self::assertSame('Alice', $result->first()['name'] ?? null);
     }
 
-    public function testFirstReturnsSingleRow(): void
+    #[Test]
+    public function firstReturnsSingleRow(): void
     {
         $this->seedUsers();
 
@@ -33,14 +37,16 @@ final class QueryBuilderTest extends SqliteTestCase
         self::assertSame('bob@example.com', $row['email']);
     }
 
-    public function testFirstReturnsNullWhenEmpty(): void
+    #[Test]
+    public function firstReturnsNullWhenEmpty(): void
     {
         $row = $this->db->table('users')->where('name', 'Nobody')->first();
 
         self::assertNull($row);
     }
 
-    public function testFindById(): void
+    #[Test]
+    public function findById(): void
     {
         $this->seedUsers();
 
@@ -50,7 +56,8 @@ final class QueryBuilderTest extends SqliteTestCase
         self::assertSame('Alice', $row['name']);
     }
 
-    public function testValueReturnsSingleValue(): void
+    #[Test]
+    public function valueReturnsSingleValue(): void
     {
         $this->seedUsers();
 
@@ -59,7 +66,8 @@ final class QueryBuilderTest extends SqliteTestCase
         self::assertSame('alice@example.com', $email);
     }
 
-    public function testEmptyWhereInExecutesAndMatchesNothing(): void
+    #[Test]
+    public function emptyWhereInExecutesAndMatchesNothing(): void
     {
         $this->seedUsers();
 
@@ -68,7 +76,8 @@ final class QueryBuilderTest extends SqliteTestCase
         self::assertSame(5, $this->db->table('users')->whereNotIn('id', [])->count());
     }
 
-    public function testPluckWithoutKey(): void
+    #[Test]
+    public function pluckWithoutKey(): void
     {
         $this->seedUsers();
 
@@ -77,7 +86,8 @@ final class QueryBuilderTest extends SqliteTestCase
         self::assertSame(['Alice', 'Bob', 'Charlie', 'Diana', 'Eve'], $names);
     }
 
-    public function testPluckWithKey(): void
+    #[Test]
+    public function pluckWithKey(): void
     {
         $this->seedUsers();
 
@@ -87,19 +97,22 @@ final class QueryBuilderTest extends SqliteTestCase
         self::assertSame('Bob', $result['bob@example.com']);
     }
 
-    public function testExistsReturnsTrue(): void
+    #[Test]
+    public function existsReturnsTrue(): void
     {
         $this->seedUsers();
 
         self::assertTrue($this->db->table('users')->where('name', 'Alice')->exists());
     }
 
-    public function testDoesntExistReturnsTrue(): void
+    #[Test]
+    public function doesntExistReturnsTrue(): void
     {
         self::assertTrue($this->db->table('users')->doesntExist());
     }
 
-    public function testWhereEquals(): void
+    #[Test]
+    public function whereEquals(): void
     {
         $this->seedUsers();
 
@@ -108,7 +121,8 @@ final class QueryBuilderTest extends SqliteTestCase
         self::assertSame(1, $result->count());
     }
 
-    public function testWhereGreaterThan(): void
+    #[Test]
+    public function whereGreaterThan(): void
     {
         $this->seedUsers();
 
@@ -118,7 +132,8 @@ final class QueryBuilderTest extends SqliteTestCase
         self::assertSame('Charlie', $result->first()['name'] ?? null);
     }
 
-    public function testWhereLessThan(): void
+    #[Test]
+    public function whereLessThan(): void
     {
         $this->seedUsers();
 
@@ -128,7 +143,8 @@ final class QueryBuilderTest extends SqliteTestCase
         self::assertSame('Eve', $result->first()['name'] ?? null);
     }
 
-    public function testWhereLike(): void
+    #[Test]
+    public function whereLike(): void
     {
         $this->seedUsers();
 
@@ -138,7 +154,8 @@ final class QueryBuilderTest extends SqliteTestCase
         self::assertSame('Alice', $result->first()['name'] ?? null);
     }
 
-    public function testOrWhere(): void
+    #[Test]
+    public function orWhere(): void
     {
         $this->seedUsers();
 
@@ -150,7 +167,8 @@ final class QueryBuilderTest extends SqliteTestCase
         self::assertSame(2, $result->count());
     }
 
-    public function testWhereIn(): void
+    #[Test]
+    public function whereIn(): void
     {
         $this->seedUsers();
 
@@ -159,7 +177,8 @@ final class QueryBuilderTest extends SqliteTestCase
         self::assertSame(3, $result->count());
     }
 
-    public function testWhereNotIn(): void
+    #[Test]
+    public function whereNotIn(): void
     {
         $this->seedUsers();
 
@@ -168,7 +187,8 @@ final class QueryBuilderTest extends SqliteTestCase
         self::assertSame(3, $result->count());
     }
 
-    public function testWhereBetween(): void
+    #[Test]
+    public function whereBetween(): void
     {
         $this->seedUsers();
 
@@ -177,7 +197,8 @@ final class QueryBuilderTest extends SqliteTestCase
         self::assertSame(3, $result->count());
     }
 
-    public function testWhereNull(): void
+    #[Test]
+    public function whereNull(): void
     {
         $this->seedUsers();
 
@@ -186,7 +207,8 @@ final class QueryBuilderTest extends SqliteTestCase
         self::assertSame(5, $result->count());
     }
 
-    public function testWhereNotNull(): void
+    #[Test]
+    public function whereNotNull(): void
     {
         $this->seedUsers();
 
@@ -195,7 +217,8 @@ final class QueryBuilderTest extends SqliteTestCase
         self::assertSame(5, $result->count());
     }
 
-    public function testWhereColumn(): void
+    #[Test]
+    public function whereColumn(): void
     {
         $this->db->unprepared('CREATE TABLE pairs (id INTEGER PRIMARY KEY, a INTEGER, b INTEGER)');
         $this->db->table('pairs')->insertBatch([
@@ -209,7 +232,8 @@ final class QueryBuilderTest extends SqliteTestCase
         self::assertSame(2, $result->count());
     }
 
-    public function testNestedWhereWithClosure(): void
+    #[Test]
+    public function nestedWhereWithClosure(): void
     {
         $this->seedUsers();
 
@@ -224,7 +248,8 @@ final class QueryBuilderTest extends SqliteTestCase
         self::assertSame(2, $result->count());
     }
 
-    public function testOrderBy(): void
+    #[Test]
+    public function orderBy(): void
     {
         $this->seedUsers();
 
@@ -233,7 +258,8 @@ final class QueryBuilderTest extends SqliteTestCase
         self::assertSame('Eve', $result->first()['name'] ?? null);
     }
 
-    public function testOrderByDesc(): void
+    #[Test]
+    public function orderByDesc(): void
     {
         $this->seedUsers();
 
@@ -242,7 +268,8 @@ final class QueryBuilderTest extends SqliteTestCase
         self::assertSame('Charlie', $result->first()['name'] ?? null);
     }
 
-    public function testLimitAndOffset(): void
+    #[Test]
+    public function limitAndOffset(): void
     {
         $this->seedUsers();
 
@@ -252,7 +279,8 @@ final class QueryBuilderTest extends SqliteTestCase
         self::assertSame('Bob', $result->first()['name'] ?? null);
     }
 
-    public function testGroupByWithCount(): void
+    #[Test]
+    public function groupByWithCount(): void
     {
         $this->seedUsers();
         $this->seedPosts();
@@ -266,14 +294,16 @@ final class QueryBuilderTest extends SqliteTestCase
         self::assertSame(1, $result->count());
     }
 
-    public function testCount(): void
+    #[Test]
+    public function countsMatchingRows(): void
     {
         $this->seedUsers();
 
         self::assertSame(5, $this->db->table('users')->count());
     }
 
-    public function testCountOnGroupedQueryReturnsNumberOfGroups(): void
+    #[Test]
+    public function countOnGroupedQueryReturnsNumberOfGroups(): void
     {
         $this->seedUsers();
 
@@ -285,14 +315,16 @@ final class QueryBuilderTest extends SqliteTestCase
         self::assertSame(2, $count);
     }
 
-    public function testSum(): void
+    #[Test]
+    public function sum(): void
     {
         $this->seedUsers();
 
         self::assertSame(850.5, $this->db->table('users')->sum('balance'));
     }
 
-    public function testAvg(): void
+    #[Test]
+    public function avg(): void
     {
         $this->seedUsers();
 
@@ -301,21 +333,24 @@ final class QueryBuilderTest extends SqliteTestCase
         self::assertEqualsWithDelta(28.0, $avg, 0.01);
     }
 
-    public function testMin(): void
+    #[Test]
+    public function min(): void
     {
         $this->seedUsers();
 
         self::assertEquals(22, $this->db->table('users')->min('age'));
     }
 
-    public function testMax(): void
+    #[Test]
+    public function max(): void
     {
         $this->seedUsers();
 
         self::assertEquals(35, $this->db->table('users')->max('age'));
     }
 
-    public function testInnerJoinWithResults(): void
+    #[Test]
+    public function innerJoinWithResults(): void
     {
         $this->seedUsers();
         $this->seedPosts();
@@ -328,7 +363,8 @@ final class QueryBuilderTest extends SqliteTestCase
         self::assertSame(3, $result->count());
     }
 
-    public function testLeftJoinIncludesNulls(): void
+    #[Test]
+    public function leftJoinIncludesNulls(): void
     {
         $this->seedUsers();
         $this->seedPosts();
@@ -341,7 +377,8 @@ final class QueryBuilderTest extends SqliteTestCase
         self::assertSame(6, $result->count());
     }
 
-    public function testInsertAndVerify(): void
+    #[Test]
+    public function insertAndVerify(): void
     {
         $this->db->table('users')->insert([
             'name' => 'Test',
@@ -355,7 +392,8 @@ final class QueryBuilderTest extends SqliteTestCase
         self::assertSame('Test', $row['name']);
     }
 
-    public function testInsertGetIdReturnsId(): void
+    #[Test]
+    public function insertGetIdReturnsId(): void
     {
         $id = $this->db->table('users')->insertGetId([
             'name' => 'Test',
@@ -372,7 +410,8 @@ final class QueryBuilderTest extends SqliteTestCase
         self::assertSame(2, $id2);
     }
 
-    public function testInsertGetIdRunsThroughLoggedWritePath(): void
+    #[Test]
+    public function insertGetIdRunsThroughLoggedWritePath(): void
     {
         $this->db->flushQueryLog();
         $this->db->enableQueryLog();
@@ -390,7 +429,8 @@ final class QueryBuilderTest extends SqliteTestCase
         self::assertStringContainsStringIgnoringCase('INSERT INTO', $log[0]['query']);
     }
 
-    public function testInsertBatch(): void
+    #[Test]
+    public function insertBatch(): void
     {
         $this->db->table('users')->insertBatch([
             ['name' => 'A', 'email' => 'a@test.com'],
@@ -401,7 +441,8 @@ final class QueryBuilderTest extends SqliteTestCase
         self::assertSame(3, $this->db->table('users')->count());
     }
 
-    public function testInsertOrIgnoreSkipsDuplicates(): void
+    #[Test]
+    public function insertOrIgnoreSkipsDuplicates(): void
     {
         $this->db->table('users')->insert([
             'name' => 'Test',
@@ -416,7 +457,8 @@ final class QueryBuilderTest extends SqliteTestCase
         self::assertSame(1, $this->db->table('users')->count());
     }
 
-    public function testUpdateAndVerify(): void
+    #[Test]
+    public function updateAndVerify(): void
     {
         $this->seedUsers();
 
@@ -428,7 +470,8 @@ final class QueryBuilderTest extends SqliteTestCase
         self::assertEquals(31, $row['age'] ?? null);
     }
 
-    public function testIncrement(): void
+    #[Test]
+    public function increment(): void
     {
         $this->seedUsers();
 
@@ -438,7 +481,8 @@ final class QueryBuilderTest extends SqliteTestCase
         self::assertEquals(35, $row['age'] ?? null);
     }
 
-    public function testDecrement(): void
+    #[Test]
+    public function decrement(): void
     {
         $this->seedUsers();
 
@@ -448,7 +492,8 @@ final class QueryBuilderTest extends SqliteTestCase
         self::assertEquals(27, $row['age'] ?? null);
     }
 
-    public function testUpsertInsertNew(): void
+    #[Test]
+    public function upsertInsertNew(): void
     {
         $this->db->table('users')->upsert(
             ['name' => 'New', 'email' => 'new@example.com', 'age' => 20],
@@ -460,7 +505,8 @@ final class QueryBuilderTest extends SqliteTestCase
         self::assertSame('New', $this->db->table('users')->where('email', 'new@example.com')->value('name'));
     }
 
-    public function testUpsertUpdateExisting(): void
+    #[Test]
+    public function upsertUpdateExisting(): void
     {
         $this->db->table('users')->insert(['name' => 'Old', 'email' => 'upsert@example.com', 'age' => 20]);
 
@@ -474,7 +520,8 @@ final class QueryBuilderTest extends SqliteTestCase
         self::assertSame('Updated', $this->db->table('users')->where('email', 'upsert@example.com')->value('name'));
     }
 
-    public function testDeleteWithWhere(): void
+    #[Test]
+    public function deleteWithWhere(): void
     {
         $this->seedUsers();
 
@@ -484,7 +531,8 @@ final class QueryBuilderTest extends SqliteTestCase
         self::assertSame(4, $this->db->table('users')->count());
     }
 
-    public function testTruncate(): void
+    #[Test]
+    public function truncate(): void
     {
         $this->seedUsers();
 
@@ -493,7 +541,8 @@ final class QueryBuilderTest extends SqliteTestCase
         self::assertSame(0, $this->db->table('users')->count());
     }
 
-    public function testTruncateResetsAutoIncrementOnSqlite(): void
+    #[Test]
+    public function truncateResetsAutoIncrementOnSqlite(): void
     {
         $this->seedUsers();
 
@@ -507,7 +556,8 @@ final class QueryBuilderTest extends SqliteTestCase
         self::assertSame(1, $id);
     }
 
-    public function testChunkProcessesAll(): void
+    #[Test]
+    public function chunkProcessesAll(): void
     {
         $this->seedUsers();
 
@@ -521,7 +571,8 @@ final class QueryBuilderTest extends SqliteTestCase
         self::assertCount(5, $allNames);
     }
 
-    public function testLazyYieldsAll(): void
+    #[Test]
+    public function lazyYieldsAll(): void
     {
         $this->seedUsers();
 
@@ -533,41 +584,44 @@ final class QueryBuilderTest extends SqliteTestCase
         self::assertSame(5, $count);
     }
 
-    public function testPaginateReturnsCorrectTotals(): void
+    #[Test]
+    public function paginateReturnsCorrectTotals(): void
     {
         $this->seedUsers();
 
         $page = $this->db->table('users')->orderBy('id')->paginate(1, 2);
 
         self::assertInstanceOf(Paginator::class, $page);
-        self::assertSame(5, $page->total());
-        self::assertSame(2, $page->count());
-        self::assertSame(1, $page->currentPage());
-        self::assertTrue($page->hasMorePages());
+        self::assertSame(5, $page->total);
+        self::assertSame(2, count($page->items));
+        self::assertSame(1, $page->current_page);
+        self::assertTrue($page->has_more);
     }
 
-    public function testSimplePaginate(): void
+    #[Test]
+    public function simplePaginate(): void
     {
         $this->seedUsers();
 
         $page = $this->db->table('users')->orderBy('id')->simplePaginate(1, 2);
 
         self::assertInstanceOf(Paginator::class, $page);
-        self::assertSame(2, $page->count());
-        self::assertTrue($page->hasMorePages());
+        self::assertSame(2, count($page->items));
+        self::assertTrue($page->has_more);
     }
 
-    public function testSimplePaginateWalksEveryRowWithoutGaps(): void
+    #[Test]
+    public function simplePaginateWalksEveryRowWithoutGaps(): void
     {
         $this->seedUsers();
 
         $seen = [];
         for ($p = 1; $p <= 10; $p++) {
             $page = $this->db->table('users')->orderBy('id')->simplePaginate($p, 2);
-            foreach ($page->items() as $row) {
+            foreach ($page->items as $row) {
                 $seen[] = (int) $row['id'];
             }
-            if (!$page->hasMorePages()) {
+            if (!$page->has_more) {
                 break;
             }
         }
@@ -575,19 +629,31 @@ final class QueryBuilderTest extends SqliteTestCase
         self::assertSame([1, 2, 3, 4, 5], $seen);
     }
 
-    public function testCursorPaginate(): void
+    #[Test]
+    public function cursorPaginate(): void
     {
         $this->seedUsers();
 
         $page = $this->db->table('users')->cursorPaginate(2, null, 'id');
 
         self::assertInstanceOf(CursorPaginator::class, $page);
-        self::assertSame(2, $page->count());
-        self::assertTrue($page->hasMorePages());
-        self::assertNotNull($page->nextCursor());
+        self::assertSame(2, count($page->items));
+        self::assertTrue($page->has_more);
+        self::assertNotNull($page->next_cursor);
     }
 
-    public function testCloneProducesIndependentQueries(): void
+    #[Test]
+    public function cursorPaginateRejectsAnUndecodableCursor(): void
+    {
+        $this->seedUsers();
+
+        $this->expectException(InvalidCursorException::class);
+
+        $this->db->table('users')->cursorPaginate(2, '!!not-base64!!', 'id');
+    }
+
+    #[Test]
+    public function cloneProducesIndependentQueries(): void
     {
         $this->seedUsers();
 
@@ -597,5 +663,27 @@ final class QueryBuilderTest extends SqliteTestCase
 
         self::assertSame(4, $base->count());
         self::assertSame(1, $clone->count());
+    }
+
+    #[Test]
+    public function aggregateDropsBindingsOfTheSelectColumnsItReplaces(): void
+    {
+        $this->seedUsers();
+        $this->seedPosts();
+
+        $query = $this->db->table('users')
+            ->select(['users.id'])
+            ->selectSub(
+                $this->db->table('posts')
+                    ->selectRaw('COUNT(*)')
+                    ->where('published', 1)
+                    ->whereColumn('user_id', '=', 'users.id'),
+                'published_posts',
+            )
+            ->where('active', 1);
+
+        self::assertSame([1, 1], $query->getBindings());
+        self::assertSame(4, $query->count());
+        self::assertSame(4, $query->paginate(1, 2)->total);
     }
 }

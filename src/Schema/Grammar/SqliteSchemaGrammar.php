@@ -109,7 +109,7 @@ final class SqliteSchemaGrammar extends SchemaGrammar
      * @param list<string> $columns The indexed columns
      * @param IndexDefinition|null $index The source index, when available
      */
-    protected function compileCreateIndexStatement(string $type, ?string $name, string $table, array $columns, ?IndexDefinition $index = null): string
+    protected function compileCreateIndexStatement(string $type, null|string $name, string $table, array $columns, null|IndexDefinition $index = null): string
     {
         if ($type === 'fulltext' || $type === 'spatial') {
             throw SchemaException::unsupportedOperation($type . ' index', 'sqlite');

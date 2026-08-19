@@ -48,7 +48,7 @@ final readonly class ResultSet implements Countable, IteratorAggregate
      *
      * @return array<string, mixed>|null
      */
-    public function first(): ?array
+    public function first(): null|array
     {
         return $this->rows[0] ?? null;
     }
@@ -58,7 +58,7 @@ final readonly class ResultSet implements Countable, IteratorAggregate
      *
      * @return array<string, mixed>|null
      */
-    public function last(): ?array
+    public function last(): null|array
     {
         if ($this->rows === []) {
             return null;
@@ -195,6 +195,23 @@ final readonly class ResultSet implements Countable, IteratorAggregate
     public function map(Closure $callback): self
     {
         return new self(array_map($callback, $this->rows));
+    }
+
+    /**
+     * Project each row through a function, returning a plain list.
+     *
+     * Unlike map(), which transforms rows into rows, this leaves the ResultSet
+     * behind: whatever the function returns is what comes back.
+     *
+     * @template T
+     *
+     * @param callable(array<string, mixed>): T $fn
+     *
+     * @return list<T>
+     */
+    public function collect(callable $fn): array
+    {
+        return array_map($fn, $this->rows);
     }
 
     /**

@@ -17,6 +17,7 @@ use PHPUnit\Framework\Attributes\Test;
  * the routing logic works end-to-end without requiring a separate server.
  */
 #[Group('mysql')]
+#[Group('integration')]
 final class ReadWriteTest extends MySqlTestCase
 {
     private DatabaseConnection $rwDb;

@@ -29,7 +29,7 @@ final class IndexDefinition
     public function __construct(
         private readonly string $type,
         private readonly string|array $columns,
-        private readonly ?string $name = null,
+        private readonly null|string $name = null,
     ) {}
 
     /**
@@ -85,7 +85,7 @@ final class IndexDefinition
      *
      * @return ?string
      */
-    public function getName(): ?string
+    public function getName(): null|string
     {
         return $this->name;
     }

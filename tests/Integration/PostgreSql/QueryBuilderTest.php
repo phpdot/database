@@ -6,17 +6,21 @@ namespace PHPdot\Database\Tests\Integration\PostgreSql;
 
 use PHPdot\Database\Exception\QueryException;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\Test;
 
 #[Group('pgsql')]
+#[Group('integration')]
 final class QueryBuilderTest extends PostgreSqlTestCase
 {
-    public function testConnectsWithDefaultCharset(): void
+    #[Test]
+    public function connectsWithDefaultCharset(): void
     {
         self::assertTrue($this->db->isConnected());
         self::assertSame('pgsql', $this->db->getDriverName());
     }
 
-    public function testInsertGetIdUsesReturning(): void
+    #[Test]
+    public function insertGetIdUsesReturning(): void
     {
         $this->createUsersTable();
 
@@ -25,7 +29,8 @@ final class QueryBuilderTest extends PostgreSqlTestCase
         self::assertSame(1, $id);
     }
 
-    public function testSelectAndAggregates(): void
+    #[Test]
+    public function selectAndAggregates(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -36,7 +41,8 @@ final class QueryBuilderTest extends PostgreSqlTestCase
         self::assertSame(35, (int) $this->db->table('users')->max('age'));
     }
 
-    public function testUniqueConstraintEnforced(): void
+    #[Test]
+    public function uniqueConstraintEnforced(): void
     {
         $this->createUsersTable();
         $this->db->table('users')->insert(['name' => 'A', 'email' => 'dup@example.com']);
@@ -45,7 +51,8 @@ final class QueryBuilderTest extends PostgreSqlTestCase
         $this->db->table('users')->insert(['name' => 'B', 'email' => 'dup@example.com']);
     }
 
-    public function testWhereJsonContainsAndLength(): void
+    #[Test]
+    public function whereJsonContainsAndLength(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -54,7 +61,8 @@ final class QueryBuilderTest extends PostgreSqlTestCase
         self::assertSame(5, $this->db->table('users')->whereJsonLength('tags', '>=', 1)->count());
     }
 
-    public function testTransactionRollback(): void
+    #[Test]
+    public function transactionRollback(): void
     {
         $this->createUsersTable();
 

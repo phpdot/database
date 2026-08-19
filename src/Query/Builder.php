@@ -18,11 +18,12 @@ namespace PHPdot\Database\Query;
 use Closure;
 use Generator;
 use InvalidArgumentException;
+use PHPdot\Contracts\Pagination\CursorPaginator;
+use PHPdot\Contracts\Pagination\Paginator;
 use PHPdot\Database\DatabaseConnection;
+use PHPdot\Database\Exception\InvalidCursorException;
 use PHPdot\Database\Exception\RecordNotFoundException;
 use PHPdot\Database\Query\Grammar\Grammar;
-use PHPdot\Database\Result\CursorPaginator;
-use PHPdot\Database\Result\Paginator;
 use PHPdot\Database\Result\ResultSet;
 use PHPdot\Database\Result\TypeCaster;
 use RuntimeException;
@@ -36,12 +37,12 @@ final class Builder
 
     private string $from = '';
 
-    private ?string $fromRaw = null;
+    private null|string $fromRaw = null;
 
     /**
      * @var array{query: string, alias: string}|null
      */
-    private ?array $fromSub = null;
+    private null|array $fromSub = null;
 
     private bool $distinct = false;
 
@@ -129,9 +130,9 @@ final class Builder
      */
     private array $orders = [];
 
-    private ?int $limitValue = null;
+    private null|int $limitValue = null;
 
-    private ?int $offsetValue = null;
+    private null|int $offsetValue = null;
 
     /**
      * @var list<array{query: self, all: bool}>
@@ -751,6 +752,34 @@ final class Builder
     }
 
     /**
+     * Add an OR WHERE LIKE clause to the query.
+     *
+     * The `or` half of whereLike(). It exists because matching one term across
+     * several columns — a name and an ISO code, a first and last name — is an
+     * OR by nature, and without this the only way to express it was
+     * `orWhere($column, 'like', $value)`, which routes through the generic
+     * operator path and never reaches the grammar's compileLikeWhere().
+     *
+     * @param string $column The column name
+     * @param string $value The LIKE pattern
+     *
+     * @return Builder
+     */
+    public function orWhereLike(string $column, string $value): self
+    {
+        $this->wheres[] = [
+            'type' => 'like',
+            'column' => $column,
+            'value' => '?',
+            'not' => false,
+            'boolean' => 'or',
+        ];
+        $this->addBindings([$value], 'where');
+
+        return $this;
+    }
+
+    /**
      * Add a WHERE NOT LIKE clause to the query.
      *
      * @param string $column The column name
@@ -935,16 +964,25 @@ final class Builder
     /**
      * Add an ORDER BY clause.
      *
+     * Accepts a Direction, which analysis can check, or a string, which it
+     * cannot. The string half normalises exactly as it always has — anything
+     * that is not 'desc' becomes ASC — so existing callers are unaffected. It
+     * is kept for published consumers through 0.x and goes at 1.0.
+     *
      * @param string|Expression $column The column to order by
-     * @param string $direction The sort direction (asc or desc)
+     * @param Direction|string $direction The sort direction
      *
      * @return Builder
      */
-    public function orderBy(string|Expression $column, string $direction = 'asc'): self
+    public function orderBy(string|Expression $column, Direction|string $direction = Direction::Asc): self
     {
+        $resolved = $direction instanceof Direction
+            ? $direction
+            : (strtolower($direction) === 'desc' ? Direction::Desc : Direction::Asc);
+
         $this->orders[] = [
             'column' => $column,
-            'direction' => strtolower($direction) === 'desc' ? 'DESC' : 'ASC',
+            'direction' => $resolved === Direction::Desc ? 'DESC' : 'ASC',
         ];
 
         return $this;
@@ -959,7 +997,7 @@ final class Builder
      */
     public function orderByDesc(string|Expression $column): self
     {
-        return $this->orderBy($column, 'desc');
+        return $this->orderBy($column, Direction::Desc);
     }
 
     /**
@@ -987,7 +1025,7 @@ final class Builder
      */
     public function latest(string $column = 'created_at'): self
     {
-        return $this->orderBy($column, 'desc');
+        return $this->orderBy($column, Direction::Desc);
     }
 
     /**
@@ -999,7 +1037,7 @@ final class Builder
      */
     public function oldest(string $column = 'created_at'): self
     {
-        return $this->orderBy($column, 'asc');
+        return $this->orderBy($column, Direction::Asc);
     }
 
     /**
@@ -1428,7 +1466,7 @@ final class Builder
      *
      * @return array<string, mixed>|null
      */
-    public function first(): ?array
+    public function first(): null|array
     {
         return $this->limit(1)->get()->first();
     }
@@ -1487,7 +1525,7 @@ final class Builder
      *
      * @return array<string, mixed>|null
      */
-    public function find(mixed $id, string $column = 'id'): ?array
+    public function find(mixed $id, string $column = 'id'): null|array
     {
         return $this->where($column, '=', $id)->first();
     }
@@ -1556,7 +1594,7 @@ final class Builder
      * @param int $page The current page number (1-based)
      * @param int $perPage The number of items per page
      *
-     * @return Paginator
+     * @return Paginator<array<string, mixed>>
      */
     public function paginate(int $page = 1, int $perPage = 15): Paginator
     {
@@ -1572,7 +1610,7 @@ final class Builder
      * @param int $page The current page number (1-based)
      * @param int $perPage The number of items per page
      *
-     * @return Paginator
+     * @return Paginator<array<string, mixed>>
      */
     public function simplePaginate(int $page = 1, int $perPage = 15): Paginator
     {
@@ -1590,17 +1628,22 @@ final class Builder
      * @param string|null $cursor The opaque cursor string from a previous page
      * @param string $column The column to paginate by
      *
-     * @return CursorPaginator
+     * @throws InvalidCursorException If the cursor cannot be decoded — same
+     *                                contract as mongodb's cursorPaginate: a corrupt cursor surfaces loudly
+     *                                instead of silently restarting from the first page
+     *
+     * @return CursorPaginator<array<string, mixed>>
      */
-    public function cursorPaginate(int $perPage = 15, ?string $cursor = null, string $column = 'id'): CursorPaginator
+    public function cursorPaginate(int $perPage = 15, null|string $cursor = null, string $column = 'id'): CursorPaginator
     {
         $builder = clone $this;
 
         if ($cursor !== null) {
             $decoded = base64_decode($cursor, true);
-            if ($decoded !== false) {
-                $builder = $builder->where($column, '>', $decoded);
+            if ($decoded === false) {
+                throw new InvalidCursorException('Pagination cursor cannot be decoded.');
             }
+            $builder = $builder->where($column, '>', $decoded);
         }
 
         $results = $builder->orderBy($column)->limit($perPage + 1)->get();
@@ -2431,6 +2474,10 @@ final class Builder
             $result = $outer->get()->first();
         } else {
             $clone->columns = [$aggregateColumn];
+
+            // The select list is gone, so the bindings it owned must go with it.
+            $clone->bindings['select'] = [];
+
             $result = $clone->get()->first();
         }
 

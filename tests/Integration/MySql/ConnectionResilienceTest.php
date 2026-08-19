@@ -6,18 +6,22 @@ namespace PHPdot\Database\Tests\Integration\MySql;
 
 use PHPdot\Database\Query\Expression;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\Test;
 
 #[Group('mysql')]
+#[Group('integration')]
 final class ConnectionResilienceTest extends MySqlTestCase
 {
-    public function testPingReturnsTrueWhenConnected(): void
+    #[Test]
+    public function pingReturnsTrueWhenConnected(): void
     {
         $this->db->ensureConnected();
 
         self::assertTrue($this->db->ping());
     }
 
-    public function testIsConnectedReturnsFalseBeforeQueries(): void
+    #[Test]
+    public function isConnectedReturnsFalseBeforeQueries(): void
     {
         $fresh = new \PHPdot\Database\DatabaseConnection(new \PHPdot\Database\Connection\MySql\MySqlConfig(
             host: getenv('MYSQL_HOST') ?: '127.0.0.1',
@@ -30,7 +34,8 @@ final class ConnectionResilienceTest extends MySqlTestCase
         self::assertFalse($fresh->isConnected());
     }
 
-    public function testEnsureConnectedConnectsLazily(): void
+    #[Test]
+    public function ensureConnectedConnectsLazily(): void
     {
         $fresh = new \PHPdot\Database\DatabaseConnection(new \PHPdot\Database\Connection\MySql\MySqlConfig(
             host: getenv('MYSQL_HOST') ?: '127.0.0.1',
@@ -48,7 +53,8 @@ final class ConnectionResilienceTest extends MySqlTestCase
         $fresh->close();
     }
 
-    public function testCloseDisconnects(): void
+    #[Test]
+    public function closeDisconnects(): void
     {
         $this->db->ensureConnected();
         self::assertTrue($this->db->isConnected());
@@ -57,7 +63,8 @@ final class ConnectionResilienceTest extends MySqlTestCase
         self::assertFalse($this->db->isConnected());
     }
 
-    public function testQueryAfterCloseTriggersReconnect(): void
+    #[Test]
+    public function queryAfterCloseTriggersReconnect(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -70,7 +77,8 @@ final class ConnectionResilienceTest extends MySqlTestCase
         self::assertTrue($this->db->isConnected());
     }
 
-    public function testQueryLogCapturesQueries(): void
+    #[Test]
+    public function queryLogCapturesQueries(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -89,7 +97,8 @@ final class ConnectionResilienceTest extends MySqlTestCase
         $this->db->disableQueryLog();
     }
 
-    public function testQueryLogRingBufferDropsOldEntries(): void
+    #[Test]
+    public function queryLogRingBufferDropsOldEntries(): void
     {
         $this->createUsersTable();
         $this->seedUsers();
@@ -109,17 +118,20 @@ final class ConnectionResilienceTest extends MySqlTestCase
         $this->db->disableQueryLog();
     }
 
-    public function testGetDriverNameReturnsMysql(): void
+    #[Test]
+    public function getDriverNameReturnsMysql(): void
     {
         self::assertSame('mysql', $this->db->getDriverName());
     }
 
-    public function testGetDatabaseNameReturnsPhpdotTest(): void
+    #[Test]
+    public function getDatabaseNameReturnsPhpdotTest(): void
     {
         self::assertSame('phpdot_test', $this->db->getDatabaseName());
     }
 
-    public function testRawReturnsExpression(): void
+    #[Test]
+    public function rawReturnsExpression(): void
     {
         $expr = $this->db->raw('NOW()');
 

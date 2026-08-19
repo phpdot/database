@@ -7,8 +7,10 @@ namespace PHPdot\Database\Tests\Integration\MySql;
 use PHPdot\Database\Migration\MigrationRepository;
 use PHPdot\Database\Migration\Migrator;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\Test;
 
 #[Group('mysql')]
+#[Group('integration')]
 final class MigrationTest extends MySqlTestCase
 {
     private Migrator $migrator;
@@ -26,7 +28,8 @@ final class MigrationTest extends MySqlTestCase
         $this->migrator = new Migrator($this->db, $this->repository);
     }
 
-    public function testRunCreatesTable(): void
+    #[Test]
+    public function runCreatesTable(): void
     {
         $executed = $this->migrator->run($this->migrationsPath);
 
@@ -35,7 +38,8 @@ final class MigrationTest extends MySqlTestCase
         self::assertTrue($this->db->schema()->hasTable('test_tags_table'));
     }
 
-    public function testStatusShowsMigrationAsRan(): void
+    #[Test]
+    public function statusShowsMigrationAsRan(): void
     {
         $this->migrator->run($this->migrationsPath);
 
@@ -45,7 +49,8 @@ final class MigrationTest extends MySqlTestCase
         self::assertContains('2026_04_03_000002_create_test_tags_table', $ran);
     }
 
-    public function testPendingShowsNoPendingAfterRun(): void
+    #[Test]
+    public function pendingShowsNoPendingAfterRun(): void
     {
         $this->migrator->run($this->migrationsPath);
 
@@ -54,7 +59,8 @@ final class MigrationTest extends MySqlTestCase
         self::assertSame([], $pending);
     }
 
-    public function testRollbackDropsTable(): void
+    #[Test]
+    public function rollbackDropsTable(): void
     {
         $this->migrator->run($this->migrationsPath);
         self::assertTrue($this->db->schema()->hasTable('test_migration_table'));
@@ -66,7 +72,8 @@ final class MigrationTest extends MySqlTestCase
         self::assertFalse($this->db->schema()->hasTable('test_tags_table'));
     }
 
-    public function testResetRollsBackAll(): void
+    #[Test]
+    public function resetRollsBackAll(): void
     {
         $this->migrator->run($this->migrationsPath);
 
