@@ -23,6 +23,6 @@
          defaults); the env vars override for other environments. -->
     <php>
         <env name="MYSQL_PORT" value="3307"/>
-        <env name="PG_PORT" value="5433"/>
+        <env name="PG_PORT" value="5432"/>
     </php>
 </phpunit>

@@ -21,7 +21,7 @@ driver-specific grammars.
 |---|---|
 | PHP | `>= 8.5` |
 | `doctrine/dbal` | `^4.4` |
-| `phpdot/contracts` | `^0.2` |
+| `phpdot/contracts` | `^0.3` |
 | `psr/log` | `^3.0` |
 
 Bring the PDO driver for your engine (`pdo_mysql`, `pdo_pgsql`, or `pdo_sqlite`). `phpdot/container` is a
